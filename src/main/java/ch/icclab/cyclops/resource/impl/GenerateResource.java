@@ -252,7 +252,7 @@ public class GenerateResource extends ServerResource {
                     userid = (String) usageArr.get(indexUserId);
                     usage = usageArr.get(indexUsage);
                     // Calculate the charge for a resource per user
-                    charge = (Double.parseDouble(usage.toString())*rate)/100000;           // TODO: Remove the hard coded divisor
+                    charge = (Double.parseDouble(usage.toString())*rate);           // TODO: Remove the hard coded divisor
                     objArrNode.add(enabledResourceList.get(i).toString());
                     objArrNode.add(userid);
                     objArrNode.add(usage);
