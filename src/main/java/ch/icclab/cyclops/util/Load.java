@@ -15,7 +15,7 @@
  *     under the License.
  */
 
-package util;
+package ch.icclab.cyclops.util;
 
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -32,10 +32,8 @@ import java.util.HashMap;
 /**
  * Author: Srikanta
  * Created on: 25-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: This class loads the configuration file and other static maps
+ *
  */
 public class Load {
     public static HashMap<String,String> configuration;

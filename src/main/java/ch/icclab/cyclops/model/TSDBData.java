@@ -22,10 +22,8 @@ import java.util.ArrayList;
 /**
  * Author: Srikanta
  * Created on: 15-Oct-14
- * Description: A POJO class for InfluxDB
+ * Description: The class is used to convert the json response from the DB to a Java object
  *
- * Change Log
- * Name        Date     Comments
  */
 public class TSDBData {
     private String name;

@@ -39,6 +39,16 @@ import java.util.HashMap;
  */
 public class ChargeResource extends ServerResource {
 
+    /**
+     * Queries the database to get the charge data records for a given time period
+     *
+     * Pseudo Code
+     * 1. Get the userid , from and to details from the API query parameters
+     * 2. Query the database to get the cdr
+     * 3. Construct the response and return the json string
+     *
+     * @return Representation
+     */
     @Get
     public Representation getChargeRecords(){
 

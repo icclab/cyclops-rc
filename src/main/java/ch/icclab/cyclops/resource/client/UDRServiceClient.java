@@ -22,31 +22,40 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Client;
-import org.restlet.Request;
 import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
-import util.Load;
+import ch.icclab.cyclops.util.Load;
 
 import java.io.IOException;
 
 /**
  * Author: Srikanta
  * Created on: 16-Feb-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: Clinet class for connecting to the UDR service
+ *
  */
 public class UDRServiceClient extends ClientResource {
 
     private String url = Load.configuration.get("UDRServiceUrl");
 
+    /**
+     * Gets the usage data for a resource
+     *
+     * Pseudo Code
+     * 1. Load the URL of the rate engine
+     * 2. Query the rule engine to get the rate for a resource
+     * 3. Convert the resonse into a JSON object
+     *
+     * @param resourceName A string containing the name of the resource
+     * @param from Timestamp for the starting date
+     * @param to Timestamp for the ending date
+     * @return ResourceUsage
+     */
     public ResourceUsage getResourceUsageData(String resourceName, String from, String to) throws IOException {
-        ResourceUsage tsdbData = null;
+        ResourceUsage resourceUsageData = null;
         JSONObject resultArray;
-        JSONObject resultObj;
         ObjectMapper mapper = new ObjectMapper();
 
         Client client = new Client(Protocol.HTTP);
@@ -57,20 +66,26 @@ public class UDRServiceClient extends ClientResource {
         Representation output = resource.getResponseEntity();
         try {
             resultArray = new JSONObject(output.getText());
-            tsdbData = mapper.readValue(resultArray.toString(),ResourceUsage.class);
+            resourceUsageData = mapper.readValue(resultArray.toString(),ResourceUsage.class);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return tsdbData;
+        return resourceUsageData;
     }
 
-
+    /**
+     * Gets the selected list of resources
+     *
+     * Pseudo Code
+     * 1. Query the UDR service /meters API
+     * 2. Return the JSON string
+     *
+     * @return String
+     */
     public String getActiveResources() throws IOException{
-        Request req;
-
         Client client = new Client(Protocol.HTTP);
         ClientResource resource = new ClientResource(url+"/meters");
-        req = resource.getRequest();
+        resource.getRequest();
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
         String result = output.getText();

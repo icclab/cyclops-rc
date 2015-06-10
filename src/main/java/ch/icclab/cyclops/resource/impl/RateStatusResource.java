@@ -18,50 +18,54 @@
 package ch.icclab.cyclops.resource.impl;
 
 import ch.icclab.cyclops.model.RateStatusResponse;
-import ch.icclab.cyclops.model.TSDBData;
-import ch.icclab.cyclops.resource.client.InfluxDBClient;
+import ch.icclab.cyclops.util.Flag;
+import ch.icclab.cyclops.util.Load;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
-import util.Flag;
-import util.Load;
 
 /**
  * Author: Srikanta
  * Created on: 27-Mar-15
  * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ *
  */
 public class RateStatusResource extends ServerResource {
 
+    /**
+     * Gets the rate of a resource
+     *
+     * Pseudo Code
+     * 1. Check for the rating policy
+     * 2. Invoke the methods to construct the response
+     *
+     * @return Representation
+     */
     @Get
     public Representation getRate(){
-        TSDBData tsdbData;
-        Long epoch;
-        InfluxDBClient dbClient = new InfluxDBClient();
-
         if(Flag.getMeteringType().equalsIgnoreCase("static")){
-            //Get the first entry
-            tsdbData = dbClient.getData("select * from rate WHERE rate_policy='static' limit 1");
-            //Get the latest static value from the DB
-            // Extract the time of the first entry
-            epoch = (Long) tsdbData.getPoints().get(0).get(0);
-            // Use the extracted epoch time to get all the data entry
-            tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE rate_policy='static' AND time > "+epoch+"ms");
             // Construct the response
-            return buildStaticRateResponse(tsdbData);
+            return buildStaticRateResponse();
         }else{
             // Construct the response
             return buildDynamicRateResponse();
         }
     }
 
-    private Representation buildStaticRateResponse(TSDBData tsdbData) {
+    /**
+     * Build the static rate of a resource
+     *
+     * Pseudo Code
+     * 1. Get the latest static rates from a list
+     * 2. Construct the response
+     * 3. Return the json string
+     *
+     * @return Representation
+     */
+    private Representation buildStaticRateResponse() {
         String jsonStr = null;
         RateStatusResponse response = new RateStatusResponse();
         ObjectMapper mapper = new ObjectMapper();
@@ -76,6 +80,15 @@ public class RateStatusResource extends ServerResource {
         return jsoneResp;
     }
 
+    /**
+     * Build the dynamic rate status response
+     *
+     * Pseudo Code
+     * 1. Set the rating policy as dynamic and construct the response
+     * 2. Return the response json string
+     *
+     * @return Representation
+     */
     private Representation buildDynamicRateResponse() {
         String jsonStr = null;
         RateStatusResponse response = new RateStatusResponse();

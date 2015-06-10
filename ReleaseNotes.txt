@@ -1,0 +1,8 @@
+Version 0.2.0
+Date 10/June/2015
+Notes
+1. "/rate" API to POST and GET the rate of a resource
+2. "/rate/status" API to get the latest rating policy
+3. "/charge" API to GET the charge for a user in a given time period
+4. "/generate/cdr" API to generate the charge records for a given time period
+5. "/generate/rate" API to generate the rate for the selected resources for a given time period

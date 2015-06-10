@@ -15,7 +15,7 @@
  *     under the License.
  */
 
-package util;
+package ch.icclab.cyclops.util;
 
 import org.joda.time.LocalDateTime;
 

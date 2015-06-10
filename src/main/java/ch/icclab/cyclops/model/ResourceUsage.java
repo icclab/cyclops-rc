@@ -22,10 +22,7 @@ import java.util.ArrayList;
 /**
  * Author: Srikanta
  * Created on: 14-Apr-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: The class is used for creating the usage report for a resource
  */
 public class ResourceUsage {
     private String resourceid;

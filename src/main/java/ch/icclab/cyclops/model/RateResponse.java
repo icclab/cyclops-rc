@@ -22,10 +22,7 @@ import java.util.HashMap;
 /**
  * Author: Srikanta
  * Created on: 17-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: The class is responsible for creating the response for a rate request for a resource
  */
 public class RateResponse {
     private HashMap time;

@@ -17,9 +17,11 @@
 
 package ch.icclab.cyclops.resource.impl;
 
+import ch.icclab.cyclops.model.RateEngineResponse;
 import ch.icclab.cyclops.model.ResourceUsage;
 import ch.icclab.cyclops.model.TSDBData;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
+import ch.icclab.cyclops.resource.client.RuleEngineClient;
 import ch.icclab.cyclops.resource.client.UDRServiceClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,9 +31,9 @@ import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
-import util.DateTimeUtil;
-import util.Flag;
-import util.Load;
+import ch.icclab.cyclops.util.DateTimeUtil;
+import ch.icclab.cyclops.util.Flag;
+import ch.icclab.cyclops.util.Load;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,20 +44,28 @@ import java.util.Random;
 /**
  * Author: Srikanta
  * Created on: 25-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: The class creates the charge data records and rate for resources when invoked.
+ *
  */
 public class GenerateResource extends ServerResource {
     private String action;
     private ArrayList enabledResourceList = new ArrayList();
 
+    /**
+     * The initial method to be executed when the class is invoked. The request parameter is extracted to a variable
+     *
+     * @return void
+     */
     @Override
     public void doInit() {
         action = (String) getRequestAttributes().get("action");
     }
 
+    /**
+     * Checks for the request attribute and invoke the corresponding method for business logic
+     *
+     * @return String
+     */
     @Get
     public String serviceRequest() throws IOException, JSONException {
         boolean rateResult = false;
@@ -79,6 +89,15 @@ public class GenerateResource extends ServerResource {
         }
     }
 
+    /**
+     * Get a list of meters which are selected
+     *
+     * Pseudo Code
+     * 1. Connect to the UDR service to get a list of meters
+     * 2. Store the meters which are selected
+     *
+     * @return ArrayList List containing the meters which are selected
+     */
     private ArrayList getEnabledResources() {
         ArrayList enabledResourceList = new ArrayList();
         UDRServiceClient udrServiceClient = new UDRServiceClient();
@@ -103,7 +122,6 @@ public class GenerateResource extends ServerResource {
                 }
             }
             pointsArr = jsonObj.getJSONArray("points");
-            Object meterArr = pointsArr.get(0);
 
             for (int j = 1; j < pointsArr.length(); j++) {
                 JSONArray arr = (JSONArray) pointsArr.get(j);
@@ -119,26 +137,67 @@ public class GenerateResource extends ServerResource {
         return enabledResourceList;
     }
 
+    /**
+     * Initiated the generation of rate depending on the existing rating policy
+     *
+     * Pseudo Code
+     * 1. Check for the rating policy
+     * 2. Invoke the method to initiate the rate generation
+     *
+     * @return boolean
+     */
     private boolean generateRate(){
+        TSDBData rateObj;
         boolean result = false;
 
         if(Flag.getMeteringType().equalsIgnoreCase("static")){
-            result = saveStaticRate();
+            rateObj = generateStaticRate();
         }else{
-            result = saveDynamicRate();
+            rateObj = generateDynamicRate();
         }
+        result = saveRate(rateObj);
         return result;
     }
 
-    private boolean saveStaticRate() {
+    /**
+     * Saves a TSDB dataObj into the database
+     *
+     * Pseudo Code
+     * 1. Create a TSDB client object
+     * 2. Convert the data object into a json string
+     * 3. Save the string into the database
+     *
+     * @param rateObj A TSDBData object containing the content to be saved into the db
+     * @return boolean
+     */
+    private boolean saveRate(TSDBData rateObj) {
+        ObjectMapper mapper = new ObjectMapper();
+        InfluxDBClient dbClient = new InfluxDBClient();
+        String jsonData = null;
+        boolean result = false;
+        try {
+            jsonData = mapper.writeValueAsString(rateObj);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        result = dbClient.saveData(jsonData);
+        return result;
+    }
+
+    /**
+     * Generates the static rate for a resource
+     *
+     * Pseudo Code
+     * 1. Get the current list of resources along with their static rates
+     * 2. Create a dataObj consisting of the resources along with its resources.
+     *
+     * @return TSDBData Data obj to be saved into the db
+     */
+    private TSDBData generateStaticRate() {
         ArrayList<String> strArr = new ArrayList<String>();
         ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
         TSDBData rateData = new TSDBData();
-        ObjectMapper mapper = new ObjectMapper();
-        InfluxDBClient dbClient = new InfluxDBClient();
         ArrayList<Object> objArrNode;
-        String jsonData = null;
-        boolean result = false;
         Iterator<Map.Entry<String, Object>> entries;
         Object key;
 
@@ -161,29 +220,29 @@ public class GenerateResource extends ServerResource {
         rateData.setName("rate");
         rateData.setColumns(strArr);
         rateData.setPoints(objArr);
-        try {
-            jsonData = mapper.writeValueAsString(rateData);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        result = dbClient.saveData(jsonData);
-        return result;
+
+        return  rateData;
     }
 
-    private boolean saveDynamicRate(){
+    /**
+     * Generates the dynamic rate for a resource
+     *
+     * Pseudo Code
+     * 1. For every resources, create a rate through a random function with the value between a range.
+     *
+     * @return TSDBData Data obj to be saved into the db
+     */
+    private TSDBData generateDynamicRate(){
         double rate;
         Random rateGenerator = new Random();
-        boolean result = false;
         TSDBData rateData = new TSDBData();
         ArrayList<String> strArr = null;
         ArrayList<Object> objArrNode;
         ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
-        InfluxDBClient dbClient = new InfluxDBClient();
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonData = null;
 
         // Iterate through the list and generate the rate for each enabled meters
         for(int k=0;k<enabledResourceList.size();k++){
+            //rate = getDynamicRate(enabledResourceList.get(k).toString());
             rate = rateGenerator.nextInt((3 - 1) + 1) + 1;
             strArr = new ArrayList<String>();
             strArr.add("resource");
@@ -199,16 +258,44 @@ public class GenerateResource extends ServerResource {
         rateData.setName("rate");
         rateData.setColumns(strArr);
         rateData.setPoints(objArr);
-        try {
-            jsonData = mapper.writeValueAsString(rateData);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        System.out.println(jsonData);
-        result = dbClient.saveData(jsonData);
-        return result;
+
+        return rateData;
     }
 
+    /**
+     * Request for generating the dynamic rate from the rule engine
+     *
+     * Pseudo Code
+     * 1. Connect to the rule engine
+     * 2. Invoke the getRate method with the resource name
+     * 3. Return the generated rate
+     *
+     * @param resourceName String containing the name of the resource for which the rate needs to be generated
+     * @return double The rate generated by the rule engine
+     */
+    private double getDynamicRate(String resourceName) {
+        double rate;
+        RateEngineResponse response;
+        RuleEngineClient client = new RuleEngineClient();
+
+        response = client.getRate(resourceName);
+        rate = response.getRate();
+        System.out.println("Got the response from rule engine. Rate: "+response.getRate());
+        return rate;
+    }
+
+    /**
+     * Generate the CDR of all the users for the selected meters
+     *
+     * Pseudo Code
+     * 1. Get the list of selected meters
+     * 2. Query the UDR service to get the usage information under these meters for all the users for a time period
+     * 3. Get the rate for the same meters for a same time period
+     * 4. Combine the rate and usage to get the charge value
+     * 5. Save it in the db
+     *
+     * @return boolean
+     */
     private boolean generateCdr() throws IOException, JSONException {
         Object usage;
         double charge;
@@ -221,6 +308,7 @@ public class GenerateResource extends ServerResource {
         RateResource rateResource = new RateResource();
         ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
         Double rate;
+        TSDBData tsdbData;
         boolean result;
         String userid;
         ResourceUsage resourceUsageStr;
@@ -233,7 +321,8 @@ public class GenerateResource extends ServerResource {
         to = time[0];
 
         for(int i=0; i<enabledResourceList.size(); i++){
-            rate = rateResource.getResourceRate(enabledResourceList.get(i).toString(), from, to);
+            tsdbData = rateResource.getResourceRate(enabledResourceList.get(i).toString(), from, to);
+            rate = calculateRate(tsdbData);
             resourceUsageStr = udrClient.getResourceUsageData(enabledResourceList.get(i).toString(),from,to);
             columnArr = resourceUsageStr.getColumn();
             usageListArr = resourceUsageStr.getUsage();
@@ -252,7 +341,7 @@ public class GenerateResource extends ServerResource {
                     userid = (String) usageArr.get(indexUserId);
                     usage = usageArr.get(indexUsage);
                     // Calculate the charge for a resource per user
-                    charge = (Double.parseDouble(usage.toString())*rate);           // TODO: Remove the hard coded divisor
+                    charge = (Double.parseDouble(usage.toString())*rate);
                     objArrNode.add(enabledResourceList.get(i).toString());
                     objArrNode.add(userid);
                     objArrNode.add(usage);
@@ -266,36 +355,44 @@ public class GenerateResource extends ServerResource {
         return result;
     }
 
-    private double getUserUsage(String usageData) {
-        String meterName;
-        JSONArray usageValue, srcArray;
-        JSONObject meterObj,respObj,usageObj;
-        JsonRepresentation jsonObj;
-        String usageStr;
-        double usage = 0;
+    /**
+     * Calculate the average rate for a time period
+     *
+     * Pseudo Code
+     * 1. Get the array of rates for a resource
+     * 2. Add the rates and get the average value
+     * 3. Return the average rate.
+     *
+     * @param tsdbData Response from the DB for containing the list of rates
+     * @return Double
+     */
+    private Double calculateRate(TSDBData tsdbData) {
+        int rateIndex;
+        int rateDataPoints;
+        Double rate = 0.0;
+        ArrayList dataPointsArray;
 
-        try {
-            jsonObj = new JsonRepresentation(usageData);
-            respObj = jsonObj.getJsonObject();
-            usageObj = respObj.getJSONObject("usage");
-            srcArray = usageObj.getJSONArray("openstack");
-
-            for(int i=0; i<srcArray.length(); i++){
-                meterObj = (JSONObject) srcArray.get(i);
-                meterName = (String) meterObj.get("name");
-                if(meterName.equals("network.incoming.bytes")){
-                    usageValue = meterObj.getJSONArray("points");
-                    usageStr =  usageValue.getJSONArray(0).get(1).toString();
-                    usage = Double.parseDouble(usageStr);
-                }
-                System.out.println("Usage for "+meterName+" is"+usage);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        rateIndex = tsdbData.getColumns().indexOf("rate");
+        rateDataPoints = tsdbData.getPoints().size();
+        for (int i=0; i<tsdbData.getPoints().size();i++){
+            dataPointsArray = tsdbData.getPoints().get(i);
+            rate = rate + Double.parseDouble(dataPointsArray.get(rateIndex)+"");
         }
-        return usage;
+        rate = rate/tsdbData.getPoints().size();
+
+        return rate;
     }
 
+    /**
+     * Save the price generated into the DB
+     *
+     * Pseudo Code
+     * 1. Create the dataobj containing the details
+     * 2. Save it into the db
+     *
+     * @param objArr Response from the DB for containing the list of rates
+     * @return boolean
+     */
     private boolean savePrice(ArrayList<ArrayList<Object>> objArr) {
         boolean result = false;
         TSDBData pricingData = new TSDBData();

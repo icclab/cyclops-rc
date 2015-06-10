@@ -17,3 +17,5 @@ hs_err_pid*
 # IntelliJ Idea files
 .idea
 rcservice.iml
+src/main/webapp/WEB-INF/configuration.txt
+target

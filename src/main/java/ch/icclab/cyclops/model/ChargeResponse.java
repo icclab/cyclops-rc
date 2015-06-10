@@ -22,10 +22,7 @@ import java.util.HashMap;
 /**
  * Author: Srikanta
  * Created on: 18-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: The class is used to create a response for a cahrge request for a user
  */
 public class ChargeResponse {
     private String userid;

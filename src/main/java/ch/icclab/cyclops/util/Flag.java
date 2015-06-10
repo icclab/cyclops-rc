@@ -15,15 +15,13 @@
  *     under the License.
  */
 
-package util;
+package ch.icclab.cyclops.util;
 
 /**
  * Author: Srikanta
  * Created on: 18-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: A POJO class for storing the flags
+ *
  */
 public class Flag {
     private static String meteringType = "dynamic";

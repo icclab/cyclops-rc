@@ -22,10 +22,7 @@ import java.util.HashMap;
 /**
  * Author: Srikanta
  * Created on: 26-Mar-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: The class is used for constructing the response for a rate policy status API request
  */
 public class RateStatusResponse {
     private String rate_policy;

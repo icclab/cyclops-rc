@@ -22,18 +22,26 @@ import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
-import util.Load;
+import ch.icclab.cyclops.util.Load;
 
 /**
  * Author: Srikanta
  * Created on: 16-Feb-15
- * Description:
+ * Description: The routing class which routes the incoming API request to its corresponding resource class.
+ * It also loads the config file at the start of the service
  *
- * Change Log
- * Name        Date     Comments
  */
 public class RCServiceApplication extends Application{
-    
+
+    /**
+     * Loads the configuration file at the beginning of the application startup
+     *
+     * Pseudo Code
+     * 1. Load the config file
+     * 2. Route the incoming API request to its corresponding resource class
+     *
+     * @return Restlet
+     */
     public Restlet createInboundRoot(){
         //Load the configuration files and flags
         loadConfiguration(getContext());
@@ -56,6 +64,7 @@ public class RCServiceApplication extends Application{
      * 2. Load the file if the the existing instance of the class is empty
      *
      * @param context
+     * @return Void
      */
     private void loadConfiguration(Context context){
         Load load = new Load();

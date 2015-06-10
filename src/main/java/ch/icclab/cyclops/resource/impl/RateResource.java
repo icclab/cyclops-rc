@@ -29,8 +29,8 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
-import util.Flag;
-import util.Load;
+import ch.icclab.cyclops.util.Flag;
+import ch.icclab.cyclops.util.Load;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,6 +44,17 @@ import java.util.*;
  * Name        Date     Comments
  */
 public class RateResource extends ServerResource {
+    /**
+     * Return the rate for a requested resource and time period
+     *
+     * Pseudo Code
+     * 1. Construct the query for the resource and time period to get the data from the db
+     * 2. Query the Db
+     * 3. Construct the response
+     * 4. Returns the response
+     *
+     * @return Representation
+     */
     @Get
     public Representation getRate(){
         TSDBData tsdbData = null;
@@ -104,6 +115,17 @@ public class RateResource extends ServerResource {
         return responseJson;
     }
 
+    /**
+     * Saves the rate mentioned for a static rating policy into the db
+     *
+     * Pseudo Code
+     * 1. Check for the rating policy
+     * 2. Set the flag as per the rating policy mentioned in the incoming request
+     * 3. Save the data into the db
+     *
+     * @param entity Entity containing the information to be saved
+     * @return Representation
+     */
     @Post("json:json")
     public Representation setRate(Representation entity){
         JsonRepresentation request;
@@ -132,18 +154,43 @@ public class RateResource extends ServerResource {
         return null;
     }
 
-    protected Double getResourceRate(String resourceName, String from, String to){
+    /**
+     * Queries the db to get the rate of a resource for a given time period
+     *
+     * Pseudo Code
+     * 1. Construct the query
+     * 2. Query the Db via the DB client
+     * 3. Return the response
+     *
+     * @param resourceName String containing the name of the resource
+     * @param from Timestamp
+     * @param to Timestamp
+     * @return TSDBData
+     */
+    protected TSDBData getResourceRate(String resourceName, String from, String to){
         String query;
         TSDBData tsdbData;
         Double rate;
         InfluxDBClient dbClient = new InfluxDBClient();
 
-        query = "SELECT mean(rate) FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
+        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
         tsdbData = dbClient.getData(query);
-        rate = Double.parseDouble("" + tsdbData.getPoints().get(0).get(1));
-        return rate ;
+        //rate = Double.parseDouble("" + tsdbData.getPoints().get(0).get(1));
+        return tsdbData ;
     }
 
+    /**
+     * Queries the db to get the rate of a resource for a given time period
+     *
+     * Pseudo Code
+     * 1. Construct the query
+     * 2. Query the Db via the DB client
+     * 3. Return the response
+     *
+     * @param jsonObj Data obj containing the static rate of a resource
+     * @param ratingPolicy String containing the rateing policy
+     * @return boolean
+     */
     private boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy) {
         boolean result = false;
         TSDBData rateData = new TSDBData();

@@ -28,7 +28,7 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
-import util.Load;
+import ch.icclab.cyclops.util.Load;
 
 import java.io.IOException;
 
@@ -37,8 +37,6 @@ import java.io.IOException;
  * Created on: 15-Oct-14
  * Description: Client class for InfluxDB
  *
- * Change Log
- * Name        Date     Comments
  */
 public class InfluxDBClient extends ClientResource {
 
@@ -77,6 +75,18 @@ public class InfluxDBClient extends ClientResource {
         return true;
     }
 
+    /**
+     * Fetches the data from InfluxDB via HTTP
+     *
+     * Pseudo Code
+     * 1. Load the login credentials from the configuration object
+     * 2. Create a client instance and set the HTTP protocol, url and auth details
+     * 3. Query the db through its API
+     * 4. Convert the json respnse into a TSDB java object
+     *
+     * @param query A query string
+     * @return TSDBData
+     */
     public TSDBData getData(String query){
         JSONArray resultArray;
         JSONObject resultObj;
