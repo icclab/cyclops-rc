@@ -13,7 +13,12 @@ Rating & Charging micro service is responsible for creating the Charge Data Reco
      $ chmod +x ./*
      $ bash install.sh
      
-#### Architecture
+### Architecture
+#### * CYCLOPS Rating Charging & Billing Framework
+<img align="middle" src="http://blog.zhaw.ch/icclab/files/2013/05/overall_architecture.png" alt="CYCLOPS Architecture" height="480" width="600"></img>
+
+#### * Rating & Charging Micro Service
+<img align="middle" src="http://blog.zhaw.ch/icclab/files/2015/06/RatingChargingService.png" alt="RC Service Architecture" height="400" width="700"></img>
 
 #### Documentation
 1. API Documentation
