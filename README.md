@@ -21,7 +21,7 @@ Rating & Charging micro service is responsible for creating the Charge Data Reco
 <img align="middle" src="http://blog.zhaw.ch/icclab/files/2015/06/RatingChargingService.png" alt="RC Service Architecture" height="400" width="700"></img>
 
 #### Documentation
-1. API Documentation
+1. <a href="https://github.com/icclab/cyclops-rc/wiki/API-Documentation">API Documentation</a>
 2. Rate calculation process
 3. CDR generation process
 4. Interaction with the rate engine
