@@ -29,10 +29,10 @@ Rating & Charging micro service is responsible for creating the Charge Data Reco
 6. CDR creation process
 
 #### Bugs & Issues
-To report any bugs or issues, please use <a href="https://github.com/icclab/cyclops-udr/issues">Github Issues</a>
+To report any bugs or issues, please use <a href="https://github.com/icclab/cyclops-rc/issues">Github Issues</a>
 
 ### Contact Us
-  * Issues/Ideas/Suggestions : <a href="https://github.com/icclab/cyclops-udr/issues">GitHub Issue</a>
+  * Issues/Ideas/Suggestions : <a href="https://github.com/icclab/cyclops-rc/issues">GitHub Issue</a>
   * Email : <a href="http://blog.zhaw.ch/icclab/srikanta-patanjali/">Srikanta</a> (pata at zhaw[dot]ch) or <a href="http://blog.zhaw.ch/icclab/piyush_harsh/">Piyush</a> (harh at zhaw[dot]ch)
   * Website : http://blog.zhaw.ch/icclab/ 
   * Tweet us @<a href="https://twitter.com/ICC_Lab">ICC_Lab</a>
