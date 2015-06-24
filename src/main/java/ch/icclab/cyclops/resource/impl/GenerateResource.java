@@ -50,6 +50,14 @@ import java.util.Random;
 public class GenerateResource extends ServerResource {
     private String action;
     private ArrayList enabledResourceList = new ArrayList();
+    private UDRServiceClient udrServiceClient = new UDRServiceClient();
+
+    public GenerateResource() {
+    }
+
+    public GenerateResource(UDRServiceClient udrServiceClient) {
+        this.udrServiceClient = udrServiceClient;
+    }
 
     /**
      * The initial method to be executed when the class is invoked. The request parameter is extracted to a variable
@@ -100,7 +108,6 @@ public class GenerateResource extends ServerResource {
      */
     private ArrayList getEnabledResources() {
         ArrayList enabledResourceList = new ArrayList();
-        UDRServiceClient udrServiceClient = new UDRServiceClient();
         String meterData;
         JsonRepresentation responseJson;
         int meterNameIndex = 0;

@@ -40,9 +40,15 @@ import java.io.IOException;
  */
 public class InfluxDBClient extends ClientResource {
 
-    private String url = Load.configuration.get("InfluxDbUrl");
-    private String dbUsername = Load.configuration.get("InfluxDBUsername");
-    private String dbPassword = Load.configuration.get("InfluxDBPassword");
+    private String url;
+    private String dbUsername;
+    private String dbPassword;
+
+    public InfluxDBClient(){
+        this.url = Load.configuration.get("InfluxDbUrl");
+        this.dbUsername = Load.configuration.get("InfluxDBUsername");
+        this.dbPassword = Load.configuration.get("InfluxDBPassword");
+    }
 
     /**
      * Saves the data into InfluxDB via HTTP

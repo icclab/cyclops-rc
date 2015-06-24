@@ -23,14 +23,11 @@ import org.restlet.resource.ServerResource;
 /**
  * Author: Srikanta
  * Created on: 16-Feb-15
- * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
+ * Description: Root class for /rc API endpoint
  */
 public class RootResource extends ServerResource {
     @Get
     public String rootMsg(){
-        return "CYCLOPS RC Service v0.2.0";
+        return "CYCLOPS RC Service v0.2.1";
     }
 }

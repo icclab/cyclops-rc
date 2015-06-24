@@ -39,11 +39,27 @@ import java.util.*;
  * Author: Srikanta
  * Created on: 16-Feb-15
  * Description:
- * <p/>
- * Change Log
- * Name        Date     Comments
  */
 public class RateResource extends ServerResource {
+    private InfluxDBClient dbClient = null;
+    private String resourceName = null;
+    private String fromDate = null;
+    private String toDate = null;
+
+    public RateResource() {
+    }
+
+    public RateResource(InfluxDBClient mockDbClient) {
+        this.dbClient = mockDbClient;
+    }
+
+    public RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate) {
+        this.dbClient = mockDbClient;
+        this.resourceName = resourceName;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
+    }
+
     /**
      * Return the rate for a requested resource and time period
      *
@@ -56,20 +72,26 @@ public class RateResource extends ServerResource {
      * @return Representation
      */
     @Get
-    public Representation getRate(){
+    public Representation getRate() throws IOException {
         TSDBData tsdbData = null;
         Representation response;
-        Long epoch;
-        InfluxDBClient dbClient = new InfluxDBClient();
         HashMap rateArr = new HashMap();
 
-        String resourceName = getQueryValue("resourcename");
-        String fromDate = getQueryValue("from");
-        String toDate = getQueryValue("to");
+        // Check if the variables are initialized through injection for unit testing else
+        // pickup the values from the request
+        if(resourceName == null || fromDate  == null || toDate  == null ){
+            resourceName = getQueryValue("resourcename");
+            fromDate = getQueryValue("from");
+            toDate = getQueryValue("to");
+        }
+
+        if(dbClient == null){
+            dbClient = new InfluxDBClient();
+        }
 
         tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         rateArr.put(resourceName, tsdbData.getPoints());
-        response = constructGetRateResponse(rateArr, resourceName, fromDate, toDate);
+        response = constructGetRateResponse(rateArr, fromDate, toDate);
         return response;
     }
 
@@ -83,14 +105,13 @@ public class RateResource extends ServerResource {
      *  4. Return the JSON string
      *
      * @param rateArr An arraylist consisting of metername and corresponding usage
-     * @param resourceName UserID for which the usage details is to be returned.
      * @param fromDate DateTime from usage data needs to be calculated
      * @param toDate DateTime upto which the usage data needs to be calculated
      * @return responseJson The response object in the JSON format
      */
-    public Representation constructGetRateResponse(HashMap rateArr, String resourceName, String fromDate, String toDate){
+    private Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate) {
 
-        String jsonStr;
+        String jsonStr = null;
         JsonRepresentation responseJson = null;
 
         RateResponse responseObj = new RateResponse();
@@ -111,7 +132,6 @@ public class RateResource extends ServerResource {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
         return responseJson;
     }
 
@@ -151,7 +171,7 @@ public class RateResource extends ServerResource {
             e.printStackTrace();
         }
 
-        return null;
+        return null; //TODO: Construct & return a response
     }
 
     /**
@@ -175,7 +195,6 @@ public class RateResource extends ServerResource {
 
         query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
         tsdbData = dbClient.getData(query);
-        //rate = Double.parseDouble("" + tsdbData.getPoints().get(0).get(1));
         return tsdbData ;
     }
 
@@ -197,7 +216,6 @@ public class RateResource extends ServerResource {
         ArrayList<String> strArr = new ArrayList<String>();
         ArrayList<Object> objArrNode;
         ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
-        InfluxDBClient dbClient = new InfluxDBClient();
         ObjectMapper mapper = new ObjectMapper();
         Load load = new Load();
         HashMap staticRate = new HashMap();
@@ -205,6 +223,10 @@ public class RateResource extends ServerResource {
         JSONObject rateJsonObj;
         Iterator iterator;
         String key;
+
+        if(dbClient == null){
+            dbClient = new InfluxDBClient();
+        }
 
         // Reset the hashmap containing the static rate
         load.setStaticRate(staticRate);
@@ -224,7 +246,7 @@ public class RateResource extends ServerResource {
                 objArrNode.add(rateJsonObj.get(key));
                 objArrNode.add(ratingPolicy);
                 objArr.add(objArrNode);
-                // Load the hashmap with the updates static rate
+                // Load the rate hashmap with the updated rate
                 staticRate.put(key,rateJsonObj.get(key));
             }
         } catch (JSONException e) {
