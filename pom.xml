@@ -71,9 +71,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-        </plugins>
-    </build>
 </project>
 
