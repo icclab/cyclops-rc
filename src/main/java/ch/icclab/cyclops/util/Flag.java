@@ -20,7 +20,7 @@ package ch.icclab.cyclops.util;
 /**
  * Author: Srikanta
  * Created on: 18-Mar-15
- * Description: A POJO class for storing the flags
+ * Description: A POJO class for storing the flags. Flags are used to distinguish between the rating policy used at any instant
  *
  */
 public class Flag {

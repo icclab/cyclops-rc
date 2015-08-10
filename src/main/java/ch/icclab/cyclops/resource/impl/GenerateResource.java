@@ -49,10 +49,22 @@ import java.util.Random;
  */
 public class GenerateResource extends ServerResource {
     private String action;
-    private ArrayList enabledResourceList = new ArrayList();
-    private UDRServiceClient udrServiceClient = new UDRServiceClient();
+    private ArrayList enabledResourceList;
+    private UDRServiceClient udrServiceClient;
+    private Load load;
+    private InfluxDBClient dbClient;
 
     public GenerateResource() {
+        this.enabledResourceList = new ArrayList();
+        this.udrServiceClient = new UDRServiceClient();
+        this.load = new Load();
+        this.dbClient = new InfluxDBClient();
+    }
+
+    public GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient){
+        this.action = mockAction;
+        this.dbClient = mockDbClient;
+        this.udrServiceClient = mockUdrServiceClient;
     }
 
     public GenerateResource(UDRServiceClient udrServiceClient) {
@@ -89,7 +101,7 @@ public class GenerateResource extends ServerResource {
         }
         // Construct the response
         if (rateResult) {
-            return "The rate generation was successful";
+            return "The rate generation was successful"; // Todo: Construct response
         } else if (cdrResult) {
             return "The cdr generation was successful";
         } else {
@@ -130,7 +142,7 @@ public class GenerateResource extends ServerResource {
             }
             pointsArr = jsonObj.getJSONArray("points");
 
-            for (int j = 1; j < pointsArr.length(); j++) {
+            for (int j = 0; j < pointsArr.length(); j++) {
                 JSONArray arr = (JSONArray) pointsArr.get(j);
                 if (Integer.parseInt(arr.get(meterStatusIndex).toString()) == 1) {
                     enabledResourceList.add(arr.get(meterNameIndex));
@@ -162,6 +174,7 @@ public class GenerateResource extends ServerResource {
         }else{
             rateObj = generateDynamicRate();
         }
+        System.out.println("Generated rate obj" + rateObj.getPoints().toString());
         result = saveRate(rateObj);
         return result;
     }
@@ -179,15 +192,16 @@ public class GenerateResource extends ServerResource {
      */
     private boolean saveRate(TSDBData rateObj) {
         ObjectMapper mapper = new ObjectMapper();
-        InfluxDBClient dbClient = new InfluxDBClient();
         String jsonData = null;
-        boolean result = false;
+        boolean result;
         try {
             jsonData = mapper.writeValueAsString(rateObj);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        System.out.println("Generated save rate into db " + jsonData);
         result = dbClient.saveData(jsonData);
+        System.out.println("Result " + result);
         return result;
     }
 
@@ -201,14 +215,14 @@ public class GenerateResource extends ServerResource {
      * @return TSDBData Data obj to be saved into the db
      */
     private TSDBData generateStaticRate() {
-        ArrayList<String> strArr = new ArrayList<String>();
-        ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
-        TSDBData rateData = new TSDBData();
         ArrayList<Object> objArrNode;
         Iterator<Map.Entry<String, Object>> entries;
         Object key;
+        ArrayList<String> strArr = new ArrayList<String>();
+        ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
+        TSDBData rateData = new TSDBData();
 
-        entries = Load.getStaticRate().entrySet().iterator();
+        entries = load.getStaticRate().entrySet().iterator();
         while(entries.hasNext()){
             Map.Entry<String, Object> entry = entries.next();
             key = entry.getKey();

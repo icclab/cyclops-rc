@@ -1,7 +1,8 @@
 Version 0.2.1
-Date 24/June/2015
+Date 10/Aug/2015
 Notes
 1. Added unit test cases for RateResource.
+2. Bug fix
 
 *********************************************************
 

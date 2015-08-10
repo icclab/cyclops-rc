@@ -39,12 +39,19 @@ import java.io.IOException;
  *
  */
 public class InfluxDBClient extends ClientResource {
-
     private String url;
     private String dbUsername;
     private String dbPassword;
+    private ClientResource cr;
 
     public InfluxDBClient(){
+        this.url = Load.configuration.get("InfluxDbUrl");
+        this.dbUsername = Load.configuration.get("InfluxDBUsername");
+        this.dbPassword = Load.configuration.get("InfluxDBPassword");
+    }
+
+    public InfluxDBClient(ClientResource mockCr){
+        this.cr = mockCr;
         this.url = Load.configuration.get("InfluxDbUrl");
         this.dbUsername = Load.configuration.get("InfluxDBUsername");
         this.dbPassword = Load.configuration.get("InfluxDBPassword");
@@ -62,16 +69,14 @@ public class InfluxDBClient extends ClientResource {
      * @return boolean
      */
     public boolean saveData(String data){
-        System.out.println("Entered the InfluxDBClient");
+        ClientResource cr;
+        Representation output;
 
         data = "["+data+"]";
-        Representation output;
         System.out.println(data);
-
         Client client = new Client(Protocol.HTTP);
-        ClientResource cr = new ClientResource(url);
+        cr = new ClientResource(url);
         cr.setChallengeResponse(ChallengeScheme.HTTP_BASIC,dbUsername,dbPassword);
-
         cr.post(data);
         output = cr.getResponseEntity();
 
