@@ -93,7 +93,7 @@ public class InfluxDBClient extends ClientResource {
      * 1. Load the login credentials from the configuration object
      * 2. Create a client instance and set the HTTP protocol, url and auth details
      * 3. Query the db through its API
-     * 4. Convert the json respnse into a TSDB java object
+     * 4. Convert the json response into a TSDB java object
      *
      * @param query A query string
      * @return TSDBData
