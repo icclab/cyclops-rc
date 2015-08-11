@@ -2,8 +2,10 @@
 echo "---------------------------------------------------------------------------"
 echo "| Setting up the database "
 echo "---------------------------------------------------------------------------"
-curl -X POST 'http://localhost:8086/db?u=root&p=root' -d '{"name": "rc_service"}'
-curl -X POST 'http://localhost:8086/db/rc_service/users?u=root&p=root' -d '{"name": "admin", "password": "Yh9hvmhGev"}'
+curl -X POST 'http://localhost:8086/cluster_admins?u=root&p=root' -d '{"name": "clusteradmin", "password": "changeit"}'
+curl -X POST 'http://localhost:8086/db?u=clusteradmin&p=changeit' -d '{"name": "rc_service"}'
+curl -X POST 'http://localhost:8086/db/rc_service/users?u=clusteradmin&p=changeit' -d '{"name": "dbadmin", "password": "changeit"}'
+curl -X POST 'http://localhost:8086/db/rc_service/users/dbadmin?u=clusteradmin&p=changeit' -d '{"admin": true}'
 echo "---------------------------------------------------------------------------"
 echo "| Installation process is complete "
 echo "---------------------------------------------------------------------------"
