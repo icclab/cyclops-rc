@@ -348,6 +348,7 @@ public class GenerateResource extends ServerResource {
         for(int k=0;k<enabledResourceList.size();k++){
             //rate = getDynamicRate(enabledResourceList.get(k).toString());
             rate = rateGenerator.nextInt((3 - 1) + 1) + 1;
+            rate = 0.25 + rateGenerator.nextDouble() * 1;
             strArr = StringUtil.strArr("resource","rate","rate_policy");
             //strArr.add("resource");
             //strArr.add("rate");
@@ -628,7 +629,7 @@ public class GenerateResource extends ServerResource {
         strArr.add("userid");
         strArr.add("usage");
         strArr.add("price");
-        pricingData.setName("cdr3");//changed to cdr3 from cdr to avoid influxdb client problems till db is dumped
+        pricingData.setName("cdr6");//changed to cdr6 from cdr to avoid influxdb client problems till db is dumped
         pricingData.setColumns(strArr);
         pricingData.setPoints(objArr);
         //get tags and put them into pricingData

@@ -97,8 +97,8 @@ public class DateTimeUtil {
 
         from = getString(fromDate);
 
-        dateTime[0] = to;
-        dateTime[1] = from;
+        dateTime[0] = to.concat("Z");
+        dateTime[1] = from.concat("Z");
 
         return dateTime;
     }

@@ -100,7 +100,7 @@ public class RateResource extends ServerResource {
         }
 
         //TODO: replace hard coded SQL query with database client access helper method
-        tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > \""+fromDate+"\" AND time < \""+toDate+"\"");
+        tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         rateArr.put(resourceName, tsdbData.getPoints());
         response = constructGetRateResponse(rateArr, fromDate, toDate);
         logger.trace("END Representation getRate() throws IOException");
@@ -214,7 +214,7 @@ public class RateResource extends ServerResource {
         InfluxDBClient dbClient = new InfluxDBClient();
 
         //TODO: replace hard coded query with helper method
-        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > \""+from+"\" AND time < \""+to+"\" ";
+        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
         tsdbData = dbClient.getData(query);
         logger.trace("END TSDBData getResourceRate(String resourceName, String from, String to)");
         return tsdbData ;

@@ -67,8 +67,8 @@ public class UDRServiceClient extends ClientResource {
 
         Client client = new Client(Protocol.HTTP);
         ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName);
-        resource.getReference().addQueryParameter("from", "\""+ from.toString() +  "\"");
-        resource.getReference().addQueryParameter("to", "\"" + to.toString() +  "\"");
+        resource.getReference().addQueryParameter("from", "\""+ from.substring(0,from.length()-1) +  "\"");
+        resource.getReference().addQueryParameter("to", "\"" + to.substring(0, to.length()-1) +  "\"");
         logger.trace("DATA ResourceUsage getResourceUsageData...: url=" + url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();

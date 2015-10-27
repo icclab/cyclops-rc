@@ -3,6 +3,6 @@ RuleEngineUrl==http://localhost:8080/ruleengine/
 InfluxDBURL==http://localhost:8086
 CeilometerURL==http://your-ip:8777/v2/
 InfluxDBUsername==some-user
-InfluxDBPassword==some-password
+InfluxDBPassword==some-pass
 dbName==udr_service
 sensuFrequency==300
