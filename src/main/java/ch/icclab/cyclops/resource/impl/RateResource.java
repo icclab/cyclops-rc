@@ -22,6 +22,8 @@ import ch.icclab.cyclops.model.TSDBData;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
@@ -41,23 +43,30 @@ import java.util.*;
  * Description:
  */
 public class RateResource extends ServerResource {
+    final static Logger logger = LogManager.getLogger(RateResource.class.getName());
     private InfluxDBClient dbClient = null;
     private String resourceName = null;
     private String fromDate = null;
     private String toDate = null;
 
     public RateResource() {
+        logger.trace("BEGIN CONSTRUCTOR RateResource()");
+        logger.trace("END CONSTRUCTOR RateResource()");
     }
 
     public RateResource(InfluxDBClient mockDbClient) {
+        logger.trace("BEGIN CONSTRUCTOR RateResource(InfluxDBClient mockDbClient)");
         this.dbClient = mockDbClient;
+        logger.trace("END CONSTRUCTOR RateResource(InfluxDBClient mockDbClient)");
     }
 
     public RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate) {
+        logger.trace("BEGIN CONSTRUCTOR RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate)");
         this.dbClient = mockDbClient;
         this.resourceName = resourceName;
         this.fromDate = fromDate;
         this.toDate = toDate;
+        logger.trace("END CONSTRUCTOR RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate)");
     }
 
     /**
@@ -73,6 +82,7 @@ public class RateResource extends ServerResource {
      */
     @Get
     public Representation getRate() throws IOException {
+        logger.trace("BEGIN Representation getRate() throws IOException");
         TSDBData tsdbData = null;
         Representation response;
         HashMap rateArr = new HashMap();
@@ -81,17 +91,19 @@ public class RateResource extends ServerResource {
         // pickup the values from the request
         if(resourceName == null || fromDate  == null || toDate  == null ){
             resourceName = getQueryValue("resourcename");
-            fromDate = getQueryValue("from");
-            toDate = getQueryValue("to");
+            fromDate = reformatDate(getQueryValue("from"));
+            toDate = reformatDate(getQueryValue("to"));
         }
 
         if(dbClient == null){
             dbClient = new InfluxDBClient();
         }
 
-        tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
+        //TODO: replace hard coded SQL query with database client access helper method
+        tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > \""+fromDate+"\" AND time < \""+toDate+"\"");
         rateArr.put(resourceName, tsdbData.getPoints());
         response = constructGetRateResponse(rateArr, fromDate, toDate);
+        logger.trace("END Representation getRate() throws IOException");
         return response;
     }
 
@@ -110,7 +122,7 @@ public class RateResource extends ServerResource {
      * @return responseJson The response object in the JSON format
      */
     private Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate) {
-
+        logger.trace("BEGIN Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
         String jsonStr = null;
         JsonRepresentation responseJson = null;
 
@@ -118,8 +130,8 @@ public class RateResource extends ServerResource {
         HashMap time = new HashMap();
         ObjectMapper mapper = new ObjectMapper();
 
-        time.put("from",fromDate);
-        time.put("to",toDate);
+        time.put("from", reformatDate(fromDate));
+        time.put("to", reformatDate(toDate));
 
         //Build the response POJO
         responseObj.setTime(time);
@@ -130,8 +142,10 @@ public class RateResource extends ServerResource {
             jsonStr = mapper.writeValueAsString(responseObj);
             responseJson = new JsonRepresentation(jsonStr);
         } catch (JsonProcessingException e) {
+            logger.error("EXCEPTION JSONPROCESSINGEXCEPTION Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
             e.printStackTrace();
         }
+        logger.trace("END Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
         return responseJson;
     }
 
@@ -148,6 +162,7 @@ public class RateResource extends ServerResource {
      */
     @Post("json:json")
     public Representation setRate(Representation entity){
+        logger.trace("BEGIN Representation setRate(Representation entity)");
         JsonRepresentation request;
         JSONObject jsonObj;
         String ratingPolicy;
@@ -164,14 +179,18 @@ public class RateResource extends ServerResource {
                 saveStaticRate(jsonObj, ratingPolicy);
             }else{
                 Flag.setMeteringType("dynamic");
+                //TODO: saveDynamicRate
             }
         } catch (IOException e) {
+            logger.error("EXCEPTION IOEXCEPTION Representation setRate(Representation entity)");
             e.printStackTrace();
+            // TODO: return error code for IOException and JSONException
         } catch (JSONException e) {
+            logger.error("EXCEPTION JSONEXCEPTION Representation setRate(Representation entity)");
             e.printStackTrace();
         }
-
-        return null; //TODO: Construct & return a response
+        logger.trace("END Representation setRate(Representation entity)");
+        return null; //TODO: Construct & return a response (maybe return code 200)
     }
 
     /**
@@ -188,29 +207,34 @@ public class RateResource extends ServerResource {
      * @return TSDBData
      */
     protected TSDBData getResourceRate(String resourceName, String from, String to){
+        logger.trace("BEGIN TSDBData getResourceRate(String resourceName, String from, String to)");
         String query;
         TSDBData tsdbData;
         Double rate;
         InfluxDBClient dbClient = new InfluxDBClient();
 
-        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
+        //TODO: replace hard coded query with helper method
+        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > \""+from+"\" AND time < \""+to+"\" ";
         tsdbData = dbClient.getData(query);
+        logger.trace("END TSDBData getResourceRate(String resourceName, String from, String to)");
         return tsdbData ;
     }
 
     /**
-     * Queries the db to get the rate of a resource for a given time period
+     * Saves static rate into InfluxDB
      *
      * Pseudo Code
-     * 1. Construct the query
-     * 2. Query the Db via the DB client
-     * 3. Return the response
+     * 1. Populate object array with "rate" data from JSONObject
+     * 2. Create the POJO object from object array
+     * 3. Map POJO object to JSON data
+     * 4. Save JSON data in InfluxDB client
      *
      * @param jsonObj Data obj containing the static rate of a resource
-     * @param ratingPolicy String containing the rateing policy
+     * @param ratingPolicy String containing the rating policy
      * @return boolean
      */
     private boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy) {
+        logger.trace("BEGIN boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
         boolean result = false;
         TSDBData rateData = new TSDBData();
         ArrayList<String> strArr = new ArrayList<String>();
@@ -227,7 +251,7 @@ public class RateResource extends ServerResource {
         if(dbClient == null){
             dbClient = new InfluxDBClient();
         }
-
+        //TODO: simplify this code, separate method of object creation from this method
         // Reset the hashmap containing the static rate
         load.setStaticRate(staticRate);
         // Set the flag to "Static"
@@ -250,6 +274,7 @@ public class RateResource extends ServerResource {
                 staticRate.put(key,rateJsonObj.get(key));
             }
         } catch (JSONException e) {
+            logger.error("EXCEPTION JSONEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
             e.printStackTrace();
         }
         // Update the static hashmap containing the static rates
@@ -261,12 +286,25 @@ public class RateResource extends ServerResource {
         try {
             jsonData = mapper.writeValueAsString(rateData);
         } catch (JsonProcessingException e) {
+            logger.error("EXCEPTION JSONPROCESSINGEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
             e.printStackTrace();
         }
 
-        System.out.println(jsonData);
+        logger.trace("DATA boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy): jsonData="+jsonData);
         result = dbClient.saveData(jsonData);
+        logger.trace("END boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
         return result;
     }
 
+    private String reformatDate(String date) {
+        if (date.contains("T")) {
+            String day = date.split("T")[0];
+            String hour = date.split("T")[1];
+            return day + " " + hour.substring(0, hour.length()-4);
+        } else {
+            String day = date.split(" ")[0];
+            String hour = date.split(" ")[1];
+            return day + "T" + hour + ":00Z";
+        }
+    }
 }

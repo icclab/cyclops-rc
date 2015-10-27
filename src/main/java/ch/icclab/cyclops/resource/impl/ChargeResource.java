@@ -61,7 +61,8 @@ public class ChargeResource extends ServerResource {
         String fromDate = getQueryValue("from");
         String toDate = getQueryValue("to");
 
-        tsdbData = dbClient.getData("SELECT * FROM cdr WHERE userid='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
+        //TODO: remove hard coded query
+        tsdbData = dbClient.getData("SELECT * FROM cdr3 WHERE userid='"+userid+"' AND time > \""+fromDate+"\" AND time < \""+toDate+"\""); //changed to cdr3 from cdr till dump db
         cdrMap.put("columns", tsdbData.getColumns());
         cdrMap.put("points", tsdbData.getPoints());
         response = constructResponse(cdrMap,userid,fromDate,toDate);

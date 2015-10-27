@@ -55,6 +55,7 @@ public class RateStatusResource extends ServerResource {
         }
     }
 
+    //TODO: parametrize these two methods and replace it with one
     /**
      * Build the static rate of a resource
      *
@@ -76,8 +77,8 @@ public class RateStatusResource extends ServerResource {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        JsonRepresentation jsoneResp = new JsonRepresentation(jsonStr);
-        return jsoneResp;
+        JsonRepresentation jsonResp = new JsonRepresentation(jsonStr);
+        return jsonResp;
     }
 
     /**
@@ -100,7 +101,7 @@ public class RateStatusResource extends ServerResource {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        JsonRepresentation jsoneResp = new JsonRepresentation(jsonStr);
-        return jsoneResp;
+        JsonRepresentation jsonResp = new JsonRepresentation(jsonStr);
+        return jsonResp;
     }
 }

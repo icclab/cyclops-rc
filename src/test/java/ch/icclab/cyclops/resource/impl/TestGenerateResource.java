@@ -40,14 +40,14 @@ public class TestGenerateResource {
 
         // Set the static rates
         rateMap.put("network.outgoing.bytes", 1);
-        rateMap.put("cpu", 3);
+        rateMap.put("cpu_util", 3);
         load.setStaticRate(rateMap);
 
         // Set the metering flag to 'static'
         Flag.setMeteringType("static");
         // Prepare the stub for udrServiceClient call
         when(mockUdrServiceClient.getActiveResources()).
-                thenReturn("{\"name\":\"meterselection\",\"columns\":[\"time\",\"sequence_number\",\"status\",\"source\",\"metersource\",\"metertype\",\"metername\"],\"points\":[[1434116539575,386263450001,1,\"cyclops-ui\",\"openstack\",\"gauge\",\"cpu\"],[1434116539575,386263440001,0,\"cyclops-ui\",\"openstack\",\"cumulative\",\"network.outgoing.bytes\"]]}");
+                thenReturn("{\"name\":\"meterselection\",\"columns\":[\"time\",\"metersource\",\"metertype\",\"source\",\"status\",\"metername\",\"value\"],\"points\":[[\"2015-09-22T12:44:41.713710586Z\",\"openstack\",\"cumulative\",\"cyclops-ui\",1,\"network.outgoing.bytes\",0],[\"2015-09-22T12:44:49.418251797Z\",\"openstack\",\"gauge\",\"cyclops-ui\",1,\"cpu_util\",0]],\"tags\":null}");
         // Prepare the stub for dbClient call
         when(mockDbClient.saveData(jsonData)).thenReturn(true);
         // Invoke the class being tested

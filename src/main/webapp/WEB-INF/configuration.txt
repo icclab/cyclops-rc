@@ -1,5 +1,8 @@
 UDRServiceUrl==http://localhost:8080/udr
 RuleEngineUrl==http://localhost:8080/ruleengine/
-InfluxDbUrl==http://localhost:8086/db/udr_service/series
-InfluxDBUsername==root
-InfluxDBPassword==root
+InfluxDBURL==http://localhost:8086
+CeilometerURL==http://your-ip:8777/v2/
+InfluxDBUsername==some-user
+InfluxDBPassword==some-password
+dbName==udr_service
+sensuFrequency==300

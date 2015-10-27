@@ -18,6 +18,8 @@
 package ch.icclab.cyclops.application;
 
 import ch.icclab.cyclops.resource.impl.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Restlet;
@@ -32,6 +34,7 @@ import ch.icclab.cyclops.util.Load;
  *
  */
 public class RCServiceApplication extends Application{
+    final static Logger logger = LogManager.getLogger(RCServiceApplication.class.getName());
 
     /**
      * Loads the configuration file at the beginning of the application startup
@@ -43,6 +46,7 @@ public class RCServiceApplication extends Application{
      * @return Restlet
      */
     public Restlet createInboundRoot(){
+        logger.trace("BEGIN Restlet createInboundRoot()");
         //Load the configuration files and flags
         loadConfiguration(getContext());
         // Router for the incoming the API request
@@ -52,6 +56,7 @@ public class RCServiceApplication extends Application{
         router.attach("/rate/status", RateStatusResource.class);
         router.attach("/charge", ChargeResource.class);
         router.attach("/generate/{action}", GenerateResource.class);
+        logger.trace("END Restlet createInboundRoot()");
 
         return router;
     }
@@ -67,10 +72,12 @@ public class RCServiceApplication extends Application{
      * @return Void
      */
     private void loadConfiguration(Context context){
+        logger.trace("BEGIN void loadConfiguration(Context context)");
         Load load = new Load();
         if(load.configuration == null){
             load.configFile(getContext());
         }
+        logger.trace("END void loadConfiguration(Context context)");
     }
 
 }

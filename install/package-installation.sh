@@ -44,14 +44,14 @@ echo "--------------------------------------------------------------------------
 apt-get install -y tomcat7
 apt-get install -y tomcat7-admin
 echo "---------------------------------------------------------------------------"
-echo "| Installing the v0.8.8 release of InfluxDB"
+echo "| Installing the v0.9.4.1 release of InfluxDB"
 echo "---------------------------------------------------------------------------"
 mkdir -p /tmp/rcservice
-wget http://get.influxdb.org/influxdb_0.8.8_amd64.deb -P /tmp/rcservice
+wget http://influxdb.s3.amazonaws.com/influxdb_0.9.4.1_amd64.deb -P /tmp/rcservice
 echo "---------------------------------------------------------------------------"
 echo "| Decompressing the InfluxDB package"
 echo "---------------------------------------------------------------------------"
-dpkg -i /tmp/rcservice/influxdb_0.8.8_amd64.deb
+dpkg -i /tmp/rcservice/influxdb_0.9.4.1_amd64.deb
 echo "---------------------------------------------------------------------------"
 echo "| Starting InfluxDB"
 echo "---------------------------------------------------------------------------"
@@ -378,7 +378,7 @@ echo "| Triggering the build for RC Service and creation of WAR file "
 echo "---------------------------------------------------------------------------"
 cd ${CURRDIR}
 cd ..
-mvn clean install
+mvn clean compile install -DskipTests=true
 echo "---------------------------------------------------------------------------"
 echo "| Deploying the WAR file to the Tomcat "
 echo "---------------------------------------------------------------------------"

@@ -26,6 +26,12 @@ import org.restlet.resource.ServerResource;
  * Description: Root class for /rc API endpoint
  */
 public class RootResource extends ServerResource {
+
+    /**
+     * Returns a string that identifies the application
+     *
+     * @return String
+     */
     @Get
     public String rootMsg(){
         return "CYCLOPS RC Service v0.2.1";
