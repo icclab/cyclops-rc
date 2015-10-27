@@ -1,6 +1,6 @@
 {
   "checks": {
-    "udrservice_check": {
+    "rcservice_cdrcheck": {
       "command": "/etc/sensu/plugins/checkcdr.sh",
       "interval": 300,
       "subscribers": [ "test" ]

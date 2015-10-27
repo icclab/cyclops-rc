@@ -1,6 +1,6 @@
 {
   "checks": {
-    "udrservice_check": {
+    "rcservice_ratecheck": {
       "command": "/etc/sensu/plugins/checkrate.sh",
       "interval": 300,
       "subscribers": [ "test" ]
