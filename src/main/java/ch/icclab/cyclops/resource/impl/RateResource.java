@@ -267,11 +267,11 @@ public class RateResource extends ServerResource {
                 key = (String) iterator.next();
                 objArrNode = new ArrayList<Object>();
                 objArrNode.add(key);
-                objArrNode.add(rateJsonObj.get(key));
+                objArrNode.add(rateJsonObj.get(key).toString().replace("\"", ""));
                 objArrNode.add(ratingPolicy);
                 objArr.add(objArrNode);
                 // Load the rate hashmap with the updated rate
-                staticRate.put(key,rateJsonObj.get(key));
+                staticRate.put(key,rateJsonObj.get(key).toString().replace("\"", ""));
             }
         } catch (JSONException e) {
             logger.error("EXCEPTION JSONEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");

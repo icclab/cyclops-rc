@@ -17,34 +17,33 @@
 
 package ch.icclab.cyclops.resource.client;
 
-        import ch.icclab.cyclops.model.TSDBData;
-        import com.fasterxml.jackson.databind.ObjectMapper;
-        import org.apache.logging.log4j.LogManager;
-        import org.apache.logging.log4j.Logger;
-        import org.influxdb.InfluxDB;
-        import org.influxdb.InfluxDBFactory;
-        import org.influxdb.dto.Point;
-        import org.influxdb.dto.Query;
-        import org.json.JSONArray;
-        import org.json.JSONException;
-        import org.json.JSONObject;
-        import org.restlet.Client;
-        import org.restlet.data.ChallengeScheme;
-        import org.restlet.data.MediaType;
-        import org.restlet.data.Protocol;
-        import org.restlet.representation.Representation;
-        import org.restlet.resource.ClientResource;
-        import ch.icclab.cyclops.util.Load;
+import ch.icclab.cyclops.model.TSDBData;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.restlet.Client;
+import org.restlet.data.ChallengeScheme;
+import org.restlet.data.MediaType;
+import org.restlet.data.Protocol;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import ch.icclab.cyclops.util.Load;
 
-        import java.io.IOException;
-        import java.text.SimpleDateFormat;
-        import java.util.*;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Author: Srikanta
  * Created on: 15-Oct-14
  * Description: Client class for InfluxDB
- *
  */
 public class InfluxDBClient extends ClientResource {
     private String dbUsername;
@@ -55,10 +54,10 @@ public class InfluxDBClient extends ClientResource {
     private Load load = new Load();
     private String url;// = Load.configuration.get("InfluxDBURL");
     private String username;// = Load.configuration.get("InfluxDBUsername");
-    private String password;// = Load.configuration.get("InfluxDBPassword");
+    private String password;// = Load.configuration.get("InfluxDBPasswordy  s");
     private String dbName;// = Load.configuration.get("dbName");
 
-    public InfluxDBClient(){
+    public InfluxDBClient() {
         this.url = Load.configuration.get("InfluxDBURL");
         this.dbUsername = Load.configuration.get("InfluxDBUsername");
         this.dbPassword = Load.configuration.get("InfluxDBPassword");
@@ -67,7 +66,7 @@ public class InfluxDBClient extends ClientResource {
         this.dbName = Load.configuration.get("dbName");
     }
 
-    public InfluxDBClient(ClientResource mockCr){
+    public InfluxDBClient(ClientResource mockCr) {
         this.url = Load.configuration.get("InfluxDBURL");
         this.dbUsername = Load.configuration.get("InfluxDBUsername");
         this.dbPassword = Load.configuration.get("InfluxDBPassword");
@@ -80,7 +79,7 @@ public class InfluxDBClient extends ClientResource {
      * Saves the data into InfluxDB via INfluxDB Java Client
      * It either saves a rate (resource, rate, rate_policy) or
      * a CDR (user, usage, price).
-     *
+     * <p>
      * Pseudo Code
      * 1. Load the login credentials from the configuration object
      * 2. Create a client instance and set the url and auth details
@@ -89,7 +88,7 @@ public class InfluxDBClient extends ClientResource {
      * @param data
      * @return boolean
      */
-    public boolean saveData(String data){
+    public boolean saveData(String data) {
         //TODO: check parametrization of this method
         //TODO: method getConnection() for InfluxDB
         url = load.configuration.get("InfluxDBURL");
@@ -129,53 +128,54 @@ public class InfluxDBClient extends ClientResource {
                 priceIndex = i;
             else if (columns[i].equals("userid"))
                 useridIndex = i;
-            logger.trace("DATA boolean saveData(String data): resourceIndex="+resourceIndex);
-            logger.trace("DATA boolean saveData(String data): rateIndex="+rateIndex);
-            logger.trace("DATA boolean saveData(String data): rate_policyIndex="+rate_policyIndex);
-            logger.trace("DATA boolean saveData(String data): usageIndex="+usageIndex);
-            logger.trace("DATA boolean saveData(String data): priceIndex="+priceIndex);
-            logger.trace("DATA boolean saveData(String data): useridIndex="+useridIndex);
+            logger.trace("DATA boolean saveData(String data): resourceIndex=" + resourceIndex);
+            logger.trace("DATA boolean saveData(String data): rateIndex=" + rateIndex);
+            logger.trace("DATA boolean saveData(String data): rate_policyIndex=" + rate_policyIndex);
+            logger.trace("DATA boolean saveData(String data): usageIndex=" + usageIndex);
+            logger.trace("DATA boolean saveData(String data): priceIndex=" + priceIndex);
+            logger.trace("DATA boolean saveData(String data): useridIndex=" + useridIndex);
         }
-        logger.trace("DATA boolean saveData(String data): points.size="+points.size());
+        logger.trace("DATA boolean saveData(String data): points.size=" + points.size());
         for (int i = 0; i < points.size(); i++) {
-            logger.trace("DATA boolean saveData(String data): i="+i);
-            logger.trace("DATA boolean saveData(String data): points.size="+points.size());
-            logger.trace("DATA boolean saveData(String data): data="+data);
-            logger.trace("DATA boolean saveData(String data): resourceIndex="+points.get(i)[resourceIndex]);
+            logger.trace("DATA boolean saveData(String data): i=" + i);
+            logger.trace("DATA boolean saveData(String data): points.size=" + points.size());
+            logger.trace("DATA boolean saveData(String data): data=" + data);
+            logger.trace("DATA boolean saveData(String data): resourceIndex=" + points.get(i)[resourceIndex]);
 
-            logger.trace("DATA boolean saveData(String data): point.length="+points.get(i).length);
+            logger.trace("DATA boolean saveData(String data): point.length=" + points.get(i).length);
             Point point;
             if ((rate_policyIndex == -1) && (rateIndex == -1)) {
                 String price = String.valueOf(points.get(i)[priceIndex]);
-                if(price.contains("]]")){
-                    price = price.replaceAll("]]","");
+                if (price.contains("]")) {
+                    price = price.replace("]", "");
                 }
-                String userid = points.get(i)[useridIndex];
-                userid = userid.substring(1,userid.length()-1);
-                logger.trace("DATA boolean saveData(String data): userid="+userid);
+                String userid = points.get(i)[useridIndex].replace("\"", "");
+                String usage = points.get(i)[usageIndex].replace("\"", "");
+                String resource = points.get(i)[resourceIndex].replace("\"", "");
+                logger.trace("DATA boolean saveData(String data): userid=" + userid);
                 point = Point.measurement(data.split("name\":\"")[1].split("\"")[0])
-                        .field("resource", points.get(i)[resourceIndex].substring(1, points.get(i)[resourceIndex].length() - 1))
-                        .field("usage", points.get(i)[usageIndex].substring(1, points.get(i)[usageIndex].length() - 1))
+                        .field("resource", resource)
+                        .field("usage", usage)
                         .field("price", price)
-                        .tag("userid",userid)
+                        .tag("userid", userid)
                         .build();
-            }
-            else {
+            } else {
                 String resource = points.get(i)[resourceIndex];
                 String rate = points.get(i)[rateIndex];
                 String rate_policy = points.get(i)[rate_policyIndex];
                 //TODO: create string cleaner method
-                rate = rate.replaceAll("]]","");
-                rate = rate.replaceAll("\"","");
-                rate_policy = rate_policy.replaceAll("]]","");
-                rate_policy = rate_policy.replaceAll("\"","");
+                rate = rate.replace("]", "");
+                rate = rate.replace("\"", "");
+                rate_policy = rate_policy.replace("]", "");
+                rate_policy = rate_policy.replace("\"", "");
+                resource = resource.replace("\"", "");
                 point = Point.measurement(data.split("name\":\"")[1].split("\"")[0])
-                        .field("resource", points.get(i)[resourceIndex].substring(1, points.get(i)[resourceIndex].length() - 1))
-                        .field("rate", points.get(i)[rateIndex])
+                        .field("resource", resource)
+                        .field("rate", rate)
                         .field("rate_policy", rate_policy)
                         .build();
             }
-            logger.trace("DATA boolean saveData(String data): point="+point);
+            logger.trace("DATA boolean saveData(String data): point=" + point);
             influxDB.write(dbName, "default", point);
         }
 
@@ -188,8 +188,8 @@ public class InfluxDBClient extends ClientResource {
     /**
      * Fetches the data from InfluxDB via HTTP
      * The resulting data is a JSON object which is mapped to a POJO class (TSDBData).
-     *
-     *
+     * <p>
+     * <p>
      * Pseudo Code
      * 1. Load the login credentials from the configuration object
      * 2. Create a client instance and set the HTTP protocol, url and auth details
@@ -199,7 +199,7 @@ public class InfluxDBClient extends ClientResource {
      * @param parameterQuery A query string
      * @return TSDBData
      */
-    public TSDBData getData(String parameterQuery){
+    public TSDBData getData(String parameterQuery) {
         //TODO: connection method
         logger.trace("BEGIN TSDBData getData(String parameterQuery)");
 
@@ -216,7 +216,7 @@ public class InfluxDBClient extends ClientResource {
         ObjectMapper mapper = new ObjectMapper();
         int timeIndex = -1;
 
-        logger.trace("DATA TSDBData getData(String parameterQuery): parameterQuery="+parameterQuery);
+        logger.trace("DATA TSDBData getData(String parameterQuery): parameterQuery=" + parameterQuery);
         Client client = new Client(Protocol.HTTP);
         ClientResource cr = new ClientResource(url);
         Query query = new Query(parameterQuery, dbName);
@@ -236,11 +236,11 @@ public class InfluxDBClient extends ClientResource {
                     return data;
                 } else {
                     JSONObject obj = (JSONObject) resultArray.get(0);
-                    logger.trace("DATA TSDBData getData(String query): obj="+obj.toString());
+                    logger.trace("DATA TSDBData getData(String query): obj=" + obj.toString());
                     JSONArray series = (JSONArray) obj.get("series");
-                    logger.trace("DATA TSDBData getData(String query): series="+series.toString());
+                    logger.trace("DATA TSDBData getData(String query): series=" + series.toString());
                     //Replace key "values" with key "points" in whole series
-                    for(int i=0; i < series.length(); i++){
+                    for (int i = 0; i < series.length(); i++) {
                         String response = series.get(i).toString();
                         //logger.trace("DATA TSDBData getData(String query): response="+response);
                         response.replaceFirst("values", "points");
@@ -249,21 +249,21 @@ public class InfluxDBClient extends ClientResource {
                         series.put(i, new JSONObject(response));
                     }
 
-                    logger.trace("DATA TSDBData getData(String query): series="+series.toString());
-                    logger.trace("DATA TSDBData getData(String query): series="+series.get(0).toString());
+                    logger.trace("DATA TSDBData getData(String query): series=" + series.toString());
+                    logger.trace("DATA TSDBData getData(String query): series=" + series.get(0).toString());
                     dataObj = mapper.readValue(series.toString(), TSDBData[].class);
                 }
             }
             //Filter the points to format the date
-            for(int i = 0 ; i<dataObj.length ; i++){
-                for(int o = 0 ; o<dataObj[i].getColumns().size(); o++) {
+            for (int i = 0; i < dataObj.length; i++) {
+                for (int o = 0; o < dataObj[i].getColumns().size(); o++) {
                     if (dataObj[i].getColumns().get(o).equalsIgnoreCase("time"))
                         timeIndex = o;
                 }
-                if(timeIndex>-1) {
+                if (timeIndex > -1) {
                     TreeMap<String, ArrayList> points = new TreeMap<String, ArrayList>();
                     for (ArrayList point : dataObj[i].getPoints()) {
-                        point.set(timeIndex, formatDate((String)point.get(timeIndex)));
+                        point.set(timeIndex, formatDate((String) point.get(timeIndex)));
                     }
                 }
             }
@@ -273,7 +273,7 @@ public class InfluxDBClient extends ClientResource {
             e.printStackTrace();
         }
         //TODO new method, parametrization for generate CDR
-        logger.trace("DATA TSDBData getData(String parameterQuery): data="+dataObj);
+        logger.trace("DATA TSDBData getData(String parameterQuery): data=" + dataObj);
         logger.trace("END TSDBData getData(String parameterQuery)");
         return dataObj[0];
     }
@@ -287,13 +287,13 @@ public class InfluxDBClient extends ClientResource {
     private Long formatDate(String dateAndTime) {
         logger.trace("BEGIN Long formatDate(String dateAndTime)");
         Date result = null;
-        try{
+        try {
             String date = dateAndTime.split("T")[0];
             String hour = dateAndTime.split("T")[1];
-            hour = hour.substring(0,8);
+            hour = hour.substring(0, 8);
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            result = formatter.parse(date+" "+hour);
-        }catch (Exception e){
+            result = formatter.parse(date + " " + hour);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         logger.trace("END Long formatDate(String dateAndTime)");
@@ -316,15 +316,21 @@ public class InfluxDBClient extends ClientResource {
         ArrayList<String[]> result = new ArrayList<String[]>();
         String[] split = json.split(":\\[")[2].split("],\\[");
         logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-        split[0] = split[0].substring(1);
-        split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 2);
-        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-        for (int i = 0; i < split.length; i++) {
-            result.add(split[i].split(","));
-            logger.trace("DATA ArrayList<String[]> getPoints(String json): result="+split[i]);
+        if (!json.contains("\"points\":[]")) {
+            split[0] = split[0].substring(1);
+            split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 15);
+            logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
+            for (int i = 0; i < split.length; i++) {
+                String[] entry = split[i].split(",");
+                for (int o = 0; o < entry.length; o++) {
+                    entry[o] = entry[o].replace("\"", "");
+                }
+                result.add(entry);
+                logger.trace("DATA ArrayList<String[]> getPoints(String json): result=" + split[i]);
+            }
+            logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
+            logger.trace("END ArrayList<String[]> getPoints(String json)");
         }
-        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-        logger.trace("END ArrayList<String[]> getPoints(String json)");
         return result;
     }
 }
