@@ -18,6 +18,8 @@
 package ch.icclab.cyclops.application;
 
 import ch.icclab.cyclops.resource.impl.*;
+import ch.icclab.cyclops.util.APICallCounter;
+import ch.icclab.cyclops.util.APICallEndpoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.restlet.Application;
@@ -51,11 +53,28 @@ public class RCServiceApplication extends Application{
         loadConfiguration(getContext());
         // Router for the incoming the API request
         Router router = new Router();
+
+        // counter for endpoint usage
+        APICallCounter counter = APICallCounter.getInstance();
+
         router.attach("/", RootResource.class);
+        counter.registerEndpoint("/");
+
         router.attach("/rate", RateResource.class);
+        counter.registerEndpoint("/rate");
+
         router.attach("/rate/status", RateStatusResource.class);
+        counter.registerEndpoint("/rate/status");
+
         router.attach("/charge", ChargeResource.class);
+        counter.registerEndpoint("/charge");
+
         router.attach("/generate/{action}", GenerateResource.class);
+        counter.registerEndpoint("/generate");
+
+        router.attach("/status", APICallEndpoint.class);
+        counter.registerEndpoint("/status");
+
         logger.trace("END Restlet createInboundRoot()");
 
         return router;

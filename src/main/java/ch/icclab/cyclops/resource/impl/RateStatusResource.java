@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.resource.impl;
 
 import ch.icclab.cyclops.model.RateStatusResponse;
+import ch.icclab.cyclops.util.APICallCounter;
 import ch.icclab.cyclops.util.Flag;
 import ch.icclab.cyclops.util.Load;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,10 @@ import org.restlet.resource.ServerResource;
  */
 public class RateStatusResource extends ServerResource {
 
+    // will be used for API Endpoint counter statistics
+    private String endpoint = "/rate/status";
+    private APICallCounter counter = APICallCounter.getInstance();
+
     /**
      * Gets the rate of a resource
      *
@@ -46,6 +51,10 @@ public class RateStatusResource extends ServerResource {
      */
     @Get
     public Representation getRate(){
+
+        // increment appropriate endpoint counter
+        counter.increment(endpoint);
+
         if(Flag.getMeteringType().equalsIgnoreCase("static")){
             // Construct the response
             return buildStaticRateResponse();

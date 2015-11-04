@@ -24,7 +24,7 @@ import ch.icclab.cyclops.resource.client.AccountingClient;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
 import ch.icclab.cyclops.resource.client.RuleEngineClient;
 import ch.icclab.cyclops.resource.client.UDRServiceClient;
-import ch.icclab.cyclops.util.StringUtil;
+import ch.icclab.cyclops.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -37,9 +37,6 @@ import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
-import ch.icclab.cyclops.util.DateTimeUtil;
-import ch.icclab.cyclops.util.Flag;
-import ch.icclab.cyclops.util.Load;
 
 import java.io.IOException;
 import java.util.*;
@@ -64,6 +61,10 @@ public class GenerateResource extends ServerResource {
     private String password = load.configuration.get("InfluxDBPassword");
     private InfluxDB influxDB = InfluxDBFactory.connect(url, username, password);
     private String dbname = load.configuration.get("dbName");
+
+    // will be used for API Endpoint counter statistics
+    private String endpoint = "/generate";
+    private APICallCounter counter = APICallCounter.getInstance();
 
     public GenerateResource() {
         logger.trace("BEGIN CONSTRUCTOR GenerateResource()");
@@ -110,6 +111,10 @@ public class GenerateResource extends ServerResource {
      */
     @Get
     public String serviceRequest() throws IOException, JSONException {
+
+        // increment appropriate endpoint counter
+        counter.increment(endpoint);
+
         logger.trace("BEGIN String serviceRequest() throws IOException, JSONException");
         boolean rateResult = false;
         boolean cdrResult = false;

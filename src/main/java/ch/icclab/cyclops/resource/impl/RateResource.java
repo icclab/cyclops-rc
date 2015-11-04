@@ -20,6 +20,7 @@ package ch.icclab.cyclops.resource.impl;
 import ch.icclab.cyclops.model.RateResponse;
 import ch.icclab.cyclops.model.TSDBData;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
+import ch.icclab.cyclops.util.APICallCounter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +49,10 @@ public class RateResource extends ServerResource {
     private String resourceName = null;
     private String fromDate = null;
     private String toDate = null;
+
+    // will be used for API Endpoint counter statistics
+    private String endpoint = "/rate";
+    private APICallCounter counter = APICallCounter.getInstance();
 
     public RateResource() {
         logger.trace("BEGIN CONSTRUCTOR RateResource()");
@@ -86,6 +91,9 @@ public class RateResource extends ServerResource {
         TSDBData tsdbData = null;
         Representation response;
         HashMap rateArr = new HashMap();
+
+        // increment appropriate endpoint counter
+        counter.increment(endpoint);
 
         // Check if the variables are initialized through injection for unit testing else
         // pickup the values from the request
@@ -166,6 +174,9 @@ public class RateResource extends ServerResource {
         JsonRepresentation request;
         JSONObject jsonObj;
         String ratingPolicy;
+
+        // increment appropriate endpoint counter
+        counter.increment(endpoint);
 
         // Get the JSON object from the incoming request
         try {

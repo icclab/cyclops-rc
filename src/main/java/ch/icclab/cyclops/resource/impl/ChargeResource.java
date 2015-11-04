@@ -20,6 +20,7 @@ package ch.icclab.cyclops.resource.impl;
 import ch.icclab.cyclops.model.ChargeResponse;
 import ch.icclab.cyclops.model.TSDBData;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
+import ch.icclab.cyclops.util.APICallCounter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.restlet.ext.json.JsonRepresentation;
@@ -39,6 +40,10 @@ import java.util.HashMap;
  */
 public class ChargeResource extends ServerResource {
 
+    // will be used for API Endpoint counter statistics
+    private String endpoint = "/charge";
+    private APICallCounter counter = APICallCounter.getInstance();
+
     /**
      * Queries the database to get the charge data records for a given time period
      *
@@ -51,6 +56,9 @@ public class ChargeResource extends ServerResource {
      */
     @Get
     public Representation getChargeRecords(){
+
+        // increment appropriate endpoint counter
+        counter.increment(endpoint);
 
         InfluxDBClient dbClient = new InfluxDBClient();
         HashMap cdrMap = new HashMap();

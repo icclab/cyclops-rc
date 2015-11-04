@@ -6,3 +6,5 @@
 src/main/webapp/WEB-INF/configuration.txt
 /target/*
 *.iml
+.DS_Store
+
