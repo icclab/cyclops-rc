@@ -19,12 +19,17 @@ package ch.icclab.cyclops.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -97,8 +102,8 @@ public class DateTimeUtil {
 
         from = getString(fromDate);
 
-        dateTime[0] = to.concat("Z");
-        dateTime[1] = from.concat("Z");
+        dateTime[0] = to;
+        dateTime[1] = from;
 
         return dateTime;
     }
@@ -133,5 +138,25 @@ public class DateTimeUtil {
         }
         epochValue = dateTime.getTime();
         return epochValue;
+    }
+
+    /**
+     * Will compute number of milliseconds from epoch to startDate
+     * @param time as string
+     * @return milliseconds since epoch
+     */
+    public static long getMillisForTime(String time) {
+        // first we have to get rid of 'T', as we need just T
+        String isoFormat = time.replace("'", "");
+
+        // then we have to create proper formatter
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")
+                .withLocale(Locale.ROOT)
+                .withChronology(ISOChronology.getInstanceUTC());
+
+        // and now parse it
+        DateTime dt = formatter.parseDateTime(isoFormat);
+
+        return dt.getMillis();
     }
 }

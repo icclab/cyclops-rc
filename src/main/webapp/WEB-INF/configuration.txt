@@ -1,8 +1,9 @@
-UDRServiceUrl==http://localhost:8080/udr
+UDRServiceUrl==http://localhsot:8080/udr
 RuleEngineUrl==http://localhost:8080/ruleengine/
 InfluxDBURL==http://localhost:8086
-CeilometerURL==http://your-ip:8777/v2/
-InfluxDBUsername==some-user
-InfluxDBPassword==some-pass
-dbName==udr_service
+CeilometerURL==http://keystone:8777/v2/
+AccountingServiceUrl==http://accounting
+InfluxDBUsername==someadmin
+InfluxDBPassword==somepass
+dbName==rc_service
 sensuFrequency==300

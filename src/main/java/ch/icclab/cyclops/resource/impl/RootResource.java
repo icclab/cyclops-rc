@@ -28,7 +28,10 @@ import org.restlet.resource.ServerResource;
  */
 public class RootResource extends ServerResource {
 
+    // who am I?
     private String endpoint = "/";
+
+    // used as counter
     private APICallCounter counter = APICallCounter.getInstance();
 
     /**
@@ -38,8 +41,6 @@ public class RootResource extends ServerResource {
      */
     @Get
     public String rootMsg(){
-
-        // increment appropriate endpoint counter
         counter.increment(endpoint);
 
         return "CYCLOPS RC Service v0.2.1";

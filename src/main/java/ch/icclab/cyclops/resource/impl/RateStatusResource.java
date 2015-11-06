@@ -36,8 +36,10 @@ import org.restlet.resource.ServerResource;
  */
 public class RateStatusResource extends ServerResource {
 
-    // will be used for API Endpoint counter statistics
+    // who am I?
     private String endpoint = "/rate/status";
+
+    // used as counter
     private APICallCounter counter = APICallCounter.getInstance();
 
     /**
@@ -52,7 +54,6 @@ public class RateStatusResource extends ServerResource {
     @Get
     public Representation getRate(){
 
-        // increment appropriate endpoint counter
         counter.increment(endpoint);
 
         if(Flag.getMeteringType().equalsIgnoreCase("static")){

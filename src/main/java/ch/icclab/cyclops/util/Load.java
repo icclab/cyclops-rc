@@ -77,4 +77,12 @@ public class Load {
         influxDB = InfluxDBFactory.connect(configuration.get("InfluxDBURL"), configuration.get("InfluxDBUsername"), configuration.get("InfluxDBPassword"));
         influxDB.createDatabase(configuration.get("dbName"));
     }
+
+    /**
+     * Simply return UDRServiceURL from configuration file
+     * @return
+     */
+    public String getUDREndpointURL() {
+        return configuration.get("UDRServiceUrl");
+    }
 }

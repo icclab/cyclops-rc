@@ -19,6 +19,9 @@
         <Logger name="ch.icclab.cyclops.resource.client.UDRServiceClient" additivity="false" level="TRACE">
             <AppenderRef ref="rc"/>
         </Logger>
+        <Logger name="ch.icclab.cyclops.resource.client.AccountingClient" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
         <Root level="TRACE">
             <AppenderRef ref="rc"/>
         </Root>

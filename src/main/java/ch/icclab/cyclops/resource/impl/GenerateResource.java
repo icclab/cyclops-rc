@@ -62,8 +62,10 @@ public class GenerateResource extends ServerResource {
     private InfluxDB influxDB = InfluxDBFactory.connect(url, username, password);
     private String dbname = load.configuration.get("dbName");
 
-    // will be used for API Endpoint counter statistics
+    // who am I?
     private String endpoint = "/generate";
+
+    // used as counter
     private APICallCounter counter = APICallCounter.getInstance();
 
     public GenerateResource() {
@@ -110,9 +112,8 @@ public class GenerateResource extends ServerResource {
      * @return String
      */
     @Get
-    public String serviceRequest() throws IOException, JSONException {
+    public String serviceRequest() throws Exception {
 
-        // increment appropriate endpoint counter
         counter.increment(endpoint);
 
         logger.trace("BEGIN String serviceRequest() throws IOException, JSONException");
@@ -121,9 +122,9 @@ public class GenerateResource extends ServerResource {
         boolean tcdrResult = false;
 
         // Get the list of enabled resources
-        enabledResourceList = getEnabledResources();
+        //enabledResourceList = getEnabledResources();
         // Service the request
-        logger.trace("DATA String serviceRequest() throws IOException, JSONException: enabledResourceList="+enabledResourceList);
+        //logger.trace("DATA String serviceRequest() throws IOException, JSONException: enabledResourceList="+enabledResourceList);
         logger.trace("DATA String serviceRequest() throws IOException, JSONException: action="+action);
         if (action.equalsIgnoreCase("rate")) {
             rateResult = generateRate();
@@ -353,7 +354,6 @@ public class GenerateResource extends ServerResource {
         for(int k=0;k<enabledResourceList.size();k++){
             //rate = getDynamicRate(enabledResourceList.get(k).toString());
             rate = rateGenerator.nextInt((3 - 1) + 1) + 1;
-            rate = 0.25 + rateGenerator.nextDouble() * 1;
             strArr = StringUtil.strArr("resource","rate","rate_policy");
             //strArr.add("resource");
             //strArr.add("rate");
@@ -430,6 +430,7 @@ public class GenerateResource extends ServerResource {
         ArrayList<ResourceUsage> resourceUsageArray;
         ArrayList<Object> objArrNode;
         HashMap tags;
+        POJOUtil pojoUtil = new POJOUtil();
 
         DateTimeUtil dateTimeUtil = new DateTimeUtil();
         time = dateTimeUtil.getRange();
@@ -462,19 +463,24 @@ public class GenerateResource extends ServerResource {
                 // Multiple the usage with the rate of the resource and save it into an arraylist
                 for (int j = 0; j < usageListArr.size(); j++) {
                     usageArr = (ArrayList) usageListArr.get(j);
-                    for (int k = 0; k < usageListArr.size(); k++) {//resourceUsageStr.get(usage).size()
+                    logger.trace("DATA boolean generateCdr()...: indexUsage=" + indexUsage);
+                    usage = usageArr.get(indexUsage);
+                    // Calculate the charge for a resource per user
+                    Double d = Double.parseDouble(usage.toString());
+                    charge = (d * rate);
+                    String resources = enabledResourceList.get(i).toString();
+                    logger.trace("DATA boolean generateCdr()...: objArr=" + Arrays.toString(objArr.toArray()));
+                    objArr = pojoUtil.populateList(usageListArr, objArr, resources, userid, usage, charge);
+                    /*for (int k = 0; k < usageListArr.size(); k++) {//resourceUsageStr.get(usage).size()
                         objArrNode = new ArrayList<Object>();
                         //userid = (String) usageArr.get(indexUserId);
-                        usage = usageArr.get(indexUsage);
-                        // Calculate the charge for a resource per user
-                        Double d = Double.parseDouble(usage.toString());
-                        charge = (d * rate);
-                        objArrNode.add(enabledResourceList.get(i).toString());
+
+                        objArrNode.add(resources);
                         objArrNode.add(userid);
                         objArrNode.add(usage);
                         objArrNode.add(charge);
                         objArr.add(objArrNode);
-                    }
+                    }*/
                 }
             }
 
@@ -498,85 +504,167 @@ public class GenerateResource extends ServerResource {
      *
      * @return boolean
      */
-    private boolean generateTNovaCdr() throws IOException, JSONException {
-        logger.trace("BEGIN boolean generateCdr() throws IOException, JSONException");
-        Object usage;
-        double charge;
-        String from, to;
-        String[] time;
-        int indexUserId, indexUsage;
-        ArrayList usageListArr, usageArr;
-        ArrayList columnArr;
-        UDRServiceClient udrClient = new UDRServiceClient();
-        RateResource rateResource = new RateResource();
-        ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
-        Double rate;
-        TSDBData tsdbData;
-        boolean result;
-        String userid;
-        String service_instance_id;
-        ResourceUsage resourceUsageStr;
-        ArrayList<Object> objArrNode;
-        HashMap tags;
+    private boolean generateTNovaCdr() throws Exception {
+        // TODO maybe continue here?
+        return true;
+    }
 
-        DateTimeUtil dateTimeUtil = new DateTimeUtil();
-        time = dateTimeUtil.getRange();
+    /**
+     * This method computes the cost of a period based on the established period of charging, the time that has being used and the price.
+     * <br>
+     * Pseudo Code:<br>
+     * 1. Get which time policy has been selected (D, W, M and Y for day, week, month and year)<br>
+     * 2. Apply the quantity that comes in the period String (1,2,3...)<br>
+     * 3. Computes the price and returns it
+     *
+     * @param period
+     * @param time
+     * @param price
+     * @return
+     */
+    private double computeCost(String period, long time, double price) {
+        logger.debug("Computing the price of the UDR.");
+        final int secondsPerDay = 86400;
+        final int secondsPerWeek = 604800;
+        final int secondsPerMonth = 2592000;//Based in 30 day month.
+        //TODO: Base the seconds per month in the real number of days of the month.
+        final int secondsPerYear = 31536000;
+        double finalPrice = 0.0;
+        int timePeriod = Integer.parseInt(String.valueOf(period.charAt(1)));
+        char periodPolicy = period.charAt(2);
+        switch (periodPolicy) {
+            case 'D':
+                finalPrice = (time / secondsPerDay * timePeriod) * price;
+                break;
+            case 'W':
+                finalPrice = (time / secondsPerWeek * timePeriod) * price;
+                break;
+            case 'M':
+                finalPrice = (time / secondsPerMonth * timePeriod) * price;
+                break;
+            case 'Y':
+                finalPrice = (time / secondsPerYear * timePeriod) * price;
+                break;
+        }
+        return finalPrice;
+    }
 
-        from = time[1];
-        to = time[0];
-        logger.trace("DATA boolean generateCdr() throws IOException, JSONException: enabledResourceList"+enabledResourceList);
-        for(int i=0; i<enabledResourceList.size(); i++){
-            tsdbData = rateResource.getResourceRate(enabledResourceList.get(i).toString(), from, to);
-            //ToDo: rate tsdbData needs a field service_instance_id
-            rate = calculateRate(tsdbData);
-            resourceUsageStr = udrClient.getResourceUsageData(enabledResourceList.get(i).toString(), from, to).get(0);
-
-
-
-            //TODO: KoBe, I added .get(0) but you have to check if the iteration still does what you want because the getResourceUsageData now is retrieving different
-            // Nothing else has been changed from your code for TNovaCDR
-
-
-
-            logger.trace("DATA boolean generateCdr() throws IOException, JSONException: resourceUsageStr"+resourceUsageStr);
-            columnArr = resourceUsageStr.getColumn();
-            logger.trace("DATA boolean generateCdr()...: columnArr=" + Arrays.toString(columnArr.toArray()));
-            usageListArr = resourceUsageStr.getUsage();
-            tags = resourceUsageStr.getTags();
-            logger.trace("DATA boolean generateCdr()...: tags=" + tags);
-            indexUserId = columnArr.indexOf("userid");
-            userid = tags.get("userid").toString();
-            logger.trace("DATA boolean generateCdr()...: userid=" + userid);
-            logger.trace("DATA boolean generateCdr()...: usageListArr=" + usageListArr.toString());
-            indexUsage = columnArr.indexOf("mean");
-            // The below if condition differentiates between the gauge and cumulative meters of openstack
-            if(indexUsage < 0){
-                indexUsage = columnArr.indexOf("sum");
+    /**
+     * Gets sum of usage of clientID/instanceID mappings and returns ArrayList of last events.
+     *
+     * @param clientInstanceMap
+     * @param dbClient
+     */
+    private TSDBData getBillingModel(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient){
+        logger.trace("BEGIN  TSDBData sumUsage(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient)");
+        ArrayList<TSDBData> UDRs = new ArrayList<TSDBData>();
+        Iterator it = clientInstanceMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            String clientId = pair.getKey().toString();
+            ArrayList<String> instances = (ArrayList<String>) pair.getValue();
+            for(String instance : instances){
+                //System.out.println("instanceid = " + instance);
+                //System.out.println("clientid = " + clientId);
+                String queryString = "SELECT sum(usedSeconds) FROM UDR WHERE clientId='" +
+                        clientId + "' AND instanceId='" + instance +
+                        "' GROUP BY clientID,instanceID";
+                logger.trace("DATA TSDBData sumUsage(...): query=" + queryString);
+               // TSDBData[] lastEvent = dbClient.query(queryString);
+                //sends the event to array
+                //lastEvents.add(lastEvent[0]);
             }
-            //ToDo: get real service instance id
-            service_instance_id = "id02";
-            // Iterate through the usage arraylist to extract the userid and usage.
-            // Multiple the usage with the rate of the resource and save it into an arraylist
-            for(int j=0; j<usageListArr.size(); j++){
-                usageArr = (ArrayList) usageListArr.get(j);
-                for(int k=0; k<usageListArr.size(); k++){//resourceUsageStr.get(usage).size()
-                    objArrNode = new ArrayList<Object>();
-                    //userid = (String) usageArr.get(indexUserId);
-                    usage = usageArr.get(indexUsage);
-                    // Calculate the charge for a resource per user
-                    charge = (Double.parseDouble(usage.toString())*rate);
-                    objArrNode.add(enabledResourceList.get(i).toString());
-                    objArrNode.add(userid);
-                    objArrNode.add(usage);
-                    objArrNode.add(charge);
-                    objArr.add(objArrNode);
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        logger.trace("END ArrayList<TSDBData> captureLastEvents(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient)");
+        return UDRs.get(0);
+    }
+
+
+    /**
+     * Concatenates two column Arrays.
+     *
+     * @param columns
+     * @return
+     */
+
+    private ArrayList<String> concatColumns(ArrayList<String> ... columns){
+        if(columns.length < 1){
+            return null;
+        }
+        else if (columns.length < 2){
+            return columns[0];
+        } else {
+            ArrayList<String> concatenated = new ArrayList<String>();
+            for(ArrayList<String> column : columns){
+                for(String col : column){
+                    concatenated.add(col);
+                }
+            }
+            return concatenated;
+
+        }
+    }
+
+    private ArrayList<Object> concatPoints(ArrayList<Object> ... points){
+        if(points.length < 1){
+            return null;
+        }
+        else if (points.length < 2){
+            return points[0];
+        } else {
+            ArrayList<Object> concatenated = new ArrayList<Object>();
+            for(ArrayList<Object> point : points){
+                for(Object pt : point){
+                    concatenated.add(pt);
+                }
+            }
+            return concatenated;
+
+        }
+    }
+
+
+    /**
+     * This method takes the POJOobject that contains all events, extracts all clientIDs
+     * and maps instanceIds to them which are saved to a HashMap.
+     *
+     * @param tsdbData
+     * @return
+     */
+    private HashMap<String,ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData){
+        logger.trace("BEGIN HashMap<String,ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData)");
+        HashMap<String,ArrayList<String>> map = new HashMap<String,ArrayList<String>>();
+        for(TSDBData obj : tsdbData){
+            ArrayList<String> columns = obj.getColumns();
+            ArrayList<ArrayList<Object>> points = obj.getPoints();
+            int clientidIndex = -1;
+            int instanceidIndex = -1;
+            for (int i = 0; i < columns.size(); i++) {
+                if (columns.get(i).equals("clientId"))
+                    clientidIndex = i;
+                else if (columns.get(i).equals("instanceId"))
+                    instanceidIndex = i;
+            }
+            for (int i = 0; i < points.size(); i++) {
+                String clientId = points.get(i).get(clientidIndex).toString();
+                String InstanceId = points.get(i).get(instanceidIndex).toString();
+                if (!(map.containsKey(clientId))){
+                    map.put(clientId, new ArrayList<String>());
+                    if (!(map.get(clientId).contains(InstanceId))){
+                        map.get(clientId).add(InstanceId);
+                    }
+                } else {
+                    if (!(map.get(clientId).contains(InstanceId))){
+                        map.get(clientId).add(InstanceId);
+                    }
+
                 }
             }
         }
-        // Save the charge array into the database
-        result = savePrice(objArr);
-        logger.trace("END boolean generateCdr() throws IOException, JSONException");
-        return result;
+        logger.trace("END HashMap<String,ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData)");
+        return map;
     }
 
     /**
@@ -634,7 +722,7 @@ public class GenerateResource extends ServerResource {
         strArr.add("userid");
         strArr.add("usage");
         strArr.add("price");
-        pricingData.setName("cdr6");//changed to cdr6 from cdr to avoid influxdb client problems till db is dumped
+        pricingData.setName("cdr3");//changed to cdr3 from cdr to avoid influxdb client problems till db is dumped
         pricingData.setColumns(strArr);
         pricingData.setPoints(objArr);
         //get tags and put them into pricingData

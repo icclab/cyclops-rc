@@ -50,8 +50,10 @@ public class RateResource extends ServerResource {
     private String fromDate = null;
     private String toDate = null;
 
-    // will be used for API Endpoint counter statistics
+    // who am I?
     private String endpoint = "/rate";
+
+    // used as counter
     private APICallCounter counter = APICallCounter.getInstance();
 
     public RateResource() {
@@ -88,12 +90,12 @@ public class RateResource extends ServerResource {
     @Get
     public Representation getRate() throws IOException {
         logger.trace("BEGIN Representation getRate() throws IOException");
+
+        counter.increment(endpoint);
+
         TSDBData tsdbData = null;
         Representation response;
         HashMap rateArr = new HashMap();
-
-        // increment appropriate endpoint counter
-        counter.increment(endpoint);
 
         // Check if the variables are initialized through injection for unit testing else
         // pickup the values from the request
@@ -171,12 +173,12 @@ public class RateResource extends ServerResource {
     @Post("json:json")
     public Representation setRate(Representation entity){
         logger.trace("BEGIN Representation setRate(Representation entity)");
+
+        counter.increment(endpoint);
+
         JsonRepresentation request;
         JSONObject jsonObj;
         String ratingPolicy;
-
-        // increment appropriate endpoint counter
-        counter.increment(endpoint);
 
         // Get the JSON object from the incoming request
         try {
@@ -225,7 +227,7 @@ public class RateResource extends ServerResource {
         InfluxDBClient dbClient = new InfluxDBClient();
 
         //TODO: replace hard coded query with helper method
-        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > '"+from+"' AND time < '"+to+"' ";
+        query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > \""+from+"\" AND time < \""+to+"\" ";
         tsdbData = dbClient.getData(query);
         logger.trace("END TSDBData getResourceRate(String resourceName, String from, String to)");
         return tsdbData ;
@@ -278,11 +280,11 @@ public class RateResource extends ServerResource {
                 key = (String) iterator.next();
                 objArrNode = new ArrayList<Object>();
                 objArrNode.add(key);
-                objArrNode.add(rateJsonObj.get(key).toString().replace("\"", ""));
+                objArrNode.add(rateJsonObj.get(key));
                 objArrNode.add(ratingPolicy);
                 objArr.add(objArrNode);
                 // Load the rate hashmap with the updated rate
-                staticRate.put(key,rateJsonObj.get(key).toString().replace("\"", ""));
+                staticRate.put(key,rateJsonObj.get(key));
             }
         } catch (JSONException e) {
             logger.error("EXCEPTION JSONEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");

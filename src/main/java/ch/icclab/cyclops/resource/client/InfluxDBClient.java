@@ -17,20 +17,21 @@
 
 package ch.icclab.cyclops.resource.client;
 
+import ch.icclab.cyclops.model.McnBillingModel;
 import ch.icclab.cyclops.model.TSDBData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Client;
-import org.restlet.data.ChallengeScheme;
-import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
@@ -54,7 +55,7 @@ public class InfluxDBClient extends ClientResource {
     private Load load = new Load();
     private String url;// = Load.configuration.get("InfluxDBURL");
     private String username;// = Load.configuration.get("InfluxDBUsername");
-    private String password;// = Load.configuration.get("InfluxDBPasswordy  s");
+    private String password;// = Load.configuration.get("InfluxDBPassword");
     private String dbName;// = Load.configuration.get("dbName");
 
     public InfluxDBClient() {
@@ -115,7 +116,6 @@ public class InfluxDBClient extends ClientResource {
         int priceIndex = -1;
         int useridIndex = -1;
         for (int i = 0; i < columns.length; i++) {
-
             if (columns[i].equals("resource"))
                 resourceIndex = i;
             else if (columns[i].equals("rate"))
@@ -128,21 +128,8 @@ public class InfluxDBClient extends ClientResource {
                 priceIndex = i;
             else if (columns[i].equals("userid"))
                 useridIndex = i;
-            logger.trace("DATA boolean saveData(String data): resourceIndex=" + resourceIndex);
-            logger.trace("DATA boolean saveData(String data): rateIndex=" + rateIndex);
-            logger.trace("DATA boolean saveData(String data): rate_policyIndex=" + rate_policyIndex);
-            logger.trace("DATA boolean saveData(String data): usageIndex=" + usageIndex);
-            logger.trace("DATA boolean saveData(String data): priceIndex=" + priceIndex);
-            logger.trace("DATA boolean saveData(String data): useridIndex=" + useridIndex);
         }
-        logger.trace("DATA boolean saveData(String data): points.size=" + points.size());
         for (int i = 0; i < points.size(); i++) {
-            logger.trace("DATA boolean saveData(String data): i=" + i);
-            logger.trace("DATA boolean saveData(String data): points.size=" + points.size());
-            logger.trace("DATA boolean saveData(String data): data=" + data);
-            logger.trace("DATA boolean saveData(String data): resourceIndex=" + points.get(i)[resourceIndex]);
-
-            logger.trace("DATA boolean saveData(String data): point.length=" + points.get(i).length);
             Point point;
             if ((rate_policyIndex == -1) && (rateIndex == -1)) {
                 String price = String.valueOf(points.get(i)[priceIndex]);
@@ -175,12 +162,8 @@ public class InfluxDBClient extends ClientResource {
                         .field("rate_policy", rate_policy)
                         .build();
             }
-            logger.trace("DATA boolean saveData(String data): point=" + point);
             influxDB.write(dbName, "default", point);
         }
-
-
-        logger.trace("END boolean saveData(String data)");
         return true;
     }
 
@@ -201,8 +184,6 @@ public class InfluxDBClient extends ClientResource {
      */
     public TSDBData getData(String parameterQuery) {
         //TODO: connection method
-        logger.trace("BEGIN TSDBData getData(String parameterQuery)");
-
         url = load.configuration.get("InfluxDBURL");
         username = load.configuration.get("InfluxDBUsername");
         password = load.configuration.get("InfluxDBPassword");
@@ -216,7 +197,6 @@ public class InfluxDBClient extends ClientResource {
         ObjectMapper mapper = new ObjectMapper();
         int timeIndex = -1;
 
-        logger.trace("DATA TSDBData getData(String parameterQuery): parameterQuery=" + parameterQuery);
         Client client = new Client(Protocol.HTTP);
         ClientResource cr = new ClientResource(url);
         Query query = new Query(parameterQuery, dbName);
@@ -232,13 +212,10 @@ public class InfluxDBClient extends ClientResource {
                     data.setColumns(new ArrayList<String>());
                     data.setPoints(new ArrayList<ArrayList<Object>>());
                     data.setTags(new HashMap());
-                    logger.trace("DATA TSDBData getData(String parameterQuery): data=" + data);
                     return data;
                 } else {
                     JSONObject obj = (JSONObject) resultArray.get(0);
-                    logger.trace("DATA TSDBData getData(String query): obj=" + obj.toString());
                     JSONArray series = (JSONArray) obj.get("series");
-                    logger.trace("DATA TSDBData getData(String query): series=" + series.toString());
                     //Replace key "values" with key "points" in whole series
                     for (int i = 0; i < series.length(); i++) {
                         String response = series.get(i).toString();
@@ -248,9 +225,6 @@ public class InfluxDBClient extends ClientResource {
                         //logger.trace("DATA TSDBData getData(String query): response="+response);
                         series.put(i, new JSONObject(response));
                     }
-
-                    logger.trace("DATA TSDBData getData(String query): series=" + series.toString());
-                    logger.trace("DATA TSDBData getData(String query): series=" + series.get(0).toString());
                     dataObj = mapper.readValue(series.toString(), TSDBData[].class);
                 }
             }
@@ -273,8 +247,6 @@ public class InfluxDBClient extends ClientResource {
             e.printStackTrace();
         }
         //TODO new method, parametrization for generate CDR
-        logger.trace("DATA TSDBData getData(String parameterQuery): data=" + dataObj);
-        logger.trace("END TSDBData getData(String parameterQuery)");
         return dataObj[0];
     }
 
@@ -316,21 +288,218 @@ public class InfluxDBClient extends ClientResource {
         ArrayList<String[]> result = new ArrayList<String[]>();
         String[] split = json.split(":\\[")[2].split("],\\[");
         logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-        if (!json.contains("\"points\":[]")) {
-            split[0] = split[0].substring(1);
-            split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 15);
-            logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-            for (int i = 0; i < split.length; i++) {
-                String[] entry = split[i].split(",");
-                for (int o = 0; o < entry.length; o++) {
-                    entry[o] = entry[o].replace("\"", "");
-                }
-                result.add(entry);
-                logger.trace("DATA ArrayList<String[]> getPoints(String json): result=" + split[i]);
-            }
-            logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-            logger.trace("END ArrayList<String[]> getPoints(String json)");
+        split[0] = split[0].substring(1);
+        split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 2);
+        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
+        for (int i = 0; i < split.length; i++) {
+            result.add(split[i].split(","));
+            logger.trace("DATA ArrayList<String[]> getPoints(String json): result=" + split[i]);
         }
+        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
+        logger.trace("END ArrayList<String[]> getPoints(String json)");
         return result;
+    }
+
+    /**
+     * Runs a query on InfluxDB. The first parameter is the query string. The second
+     * is the database.
+     *
+     * @param params
+     * @return
+     */
+    public TSDBData[] query(String... params) {
+        logger.trace("BEGIN query TSDBData[] query(String parameterQuery)");
+        String parameterQuery = params.length > 0 ? params[0] : "";
+        String dbname = params.length > 1 ? params[1] : Load.configuration.get("dbName");
+
+        InfluxDB influxDB = InfluxDBFactory.connect(Load.configuration.get("InfluxDBURL"), "root", "root");
+        TSDBData[] tsdbData = null;
+        JSONArray resultArray = null;
+        TSDBData[] dataObj = null;
+        ObjectMapper mapper = new ObjectMapper();
+
+        Query query = new Query(parameterQuery, dbname);
+        try {
+            logger.debug("Attempting to execute the query: " + parameterQuery + " into the db: " + dbname);
+            resultArray = new JSONArray(influxDB.query(query).getResults());
+            logger.debug("Obtained results: " + resultArray.toString());
+            if (!resultArray.isNull(0)) {
+                if (resultArray.toString().equals("[{}]")) {
+                    logger.debug("Result is [{}]");
+                    TSDBData data = new TSDBData();
+                    data.setColumns(new ArrayList<String>());
+                    data.setPoints(new ArrayList<ArrayList<Object>>());
+                    data.setTags(new HashMap());
+                    tsdbData = new TSDBData[1];
+                    tsdbData[0] = data;
+                } else {
+                    JSONObject obj = (JSONObject) resultArray.get(0);
+                    //TODO: translate data format
+                    logger.debug("JSON obj: " + obj.toString());
+                    JSONArray series = (JSONArray) obj.get("series");
+                    for (int i = 0; i < series.length(); i++) {
+                        String respons = series.get(i).toString();
+                        respons = respons.split("values")[0] + "points" + respons.split("values")[1];
+                        series.put(i, new JSONObject(respons));
+                    }
+                    dataObj = mapper.readValue(series.toString(), TSDBData[].class);
+                    logger.debug("dataObj: " + dataObj.toString());
+                    tsdbData = dataObj;
+                }
+            } else {
+                logger.debug("Result is null");
+                TSDBData data = new TSDBData();
+                data.setColumns(new ArrayList<String>());
+                data.setPoints(new ArrayList<ArrayList<Object>>());
+                data.setTags(new HashMap());
+                tsdbData = new TSDBData[1];
+                tsdbData[0] = data;
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        logger.trace("END query TSDBData[] query(String parameterQuery)");
+        return tsdbData;
+    }
+
+    /**
+     * Asks for InfluxDB BatchPoints container
+     *
+     * @return empty container
+     */
+    public BatchPoints giveMeEmptyContainer() {
+        return BatchPoints
+                .database(dbName)
+                .retentionPolicy("default")
+                .consistency(InfluxDB.ConsistencyLevel.ALL)
+                .build();
+    }
+
+    /**
+     * Ask for connection to InfluxDB
+     *
+     * @return
+     */
+    private InfluxDB getConnection() {
+        return InfluxDBFactory.connect(this.url, this.username, this.password);
+    }
+
+    /**
+     * Save container to InfluxDB container
+     *
+     * @param container that is goint to be saved
+     */
+    public void saveContainerToDB(BatchPoints container) {
+        InfluxDB db = getConnection();
+        db.write(container);
+    }
+
+    /**
+     * Will look into database and return the date of last pull, or epoch if there was none
+     *
+     * @return String
+     */
+    public String getLastPull() {
+        InfluxDB db = getConnection();
+
+        // this is epoch
+        String date = "";
+
+        // prepare select query
+        String select = "select * from mcn_cdr order by desc limit 1";
+
+        try {
+
+            // fire up the query
+            QueryResult response = db.query(createQuery(select, dbName));
+
+            // parse all results
+            JSONArray resultArray = new JSONArray(response.getResults());
+
+            // get first result
+            JSONObject result = (JSONObject) resultArray.get(0);
+
+            // get series
+            JSONArray series = (JSONArray) result.get("series");
+
+            // get first series
+            JSONObject firstSeries = (JSONObject) series.get(0);
+
+            // get values
+            JSONArray values = (JSONArray) firstSeries.get("values");
+
+            // use first value
+            JSONArray firstValue = (JSONArray) values.get(0);
+
+            // and finally our time
+            date = firstValue.get(0).toString().replace("Z", "");
+
+        } catch (Exception e) {
+            logger.debug("This is the first pull, therefore we will pull data since Epoch");
+        }
+
+        return date;
+    }
+
+    /**
+     * Creates query for provided command and db
+     *
+     * @param command
+     * @param db
+     * @return Query
+     */
+    protected Query createQuery(String command, String db) {
+        return new Query(command, db);
+    }
+
+    /**
+     * Retrieve Billing Model from the DB
+     *
+     * @param customer
+     * @param resource
+     * @param time
+     */
+    public McnBillingModel getBillingModel(String customer, String resource, String time) {
+        McnBillingModel billingModel = new McnBillingModel();
+
+        billingModel.setPrice(getRate(resource, time));
+
+        return billingModel;
+    }
+
+    private double getRate(String resource, String timeFrom) {
+        String query = getRateQuery(resource, timeFrom);
+        TSDBData tsdbData = this.getData(query);
+        int rateIndex = -1;
+        double rate;
+        ArrayList<String> columns = tsdbData.getColumns();
+        ArrayList<ArrayList<Object>> points = tsdbData.getPoints();
+
+        //Depending on the result of the first query, if we don't have a rate for that period, we use the last rate on the db.
+        if(points.size()<1) {
+            query = this.getLastRateQuery(resource);
+            tsdbData = this.getData(query);
+            columns = tsdbData.getColumns();
+            points = tsdbData.getPoints();
+        }
+
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).equals("rate"))
+                rateIndex = i;
+        }
+        rate = Double.parseDouble((String) points.get(0).get(rateIndex));
+
+        return rate;
+    }
+
+    private String getRateQuery(String resource, String timeFrom) {
+        return "SELECT rate FROM rate WHERE resource='" + resource + "' AND time>'" + timeFrom + "'";
+    }
+
+    private String getLastRateQuery(String resource) {
+        return "SELECT rate FROM rate WHERE resource='" + resource + "' ORDER BY time DESC limit 1";
     }
 }

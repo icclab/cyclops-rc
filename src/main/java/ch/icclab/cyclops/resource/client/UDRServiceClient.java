@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.resource.client;
 
 import ch.icclab.cyclops.model.ResourceUsage;
+import ch.icclab.cyclops.model.TSDBData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +46,13 @@ public class UDRServiceClient extends ClientResource {
 
     private String url = Load.configuration.get("UDRServiceUrl");
 
+    private String reformatDate(String date) {
+        String day = date.split("T")[0];
+        String hour = date.split("T")[1];
+        hour = hour.split(":00Z")[0];
+        return day + " " + hour;
+    }
+
     /**
      * Gets the usage data for a resource
      * <p>
@@ -67,8 +75,13 @@ public class UDRServiceClient extends ClientResource {
 
         Client client = new Client(Protocol.HTTP);
         ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName);
-        resource.getReference().addQueryParameter("from", "\""+ from.substring(0,from.length()-1) +  "\"");
-        resource.getReference().addQueryParameter("to", "\"" + to.substring(0, to.length()-1) +  "\"");
+        from = reformatDate(from.toString());
+        to = reformatDate(to.toString());
+        resource.getReference().addQueryParameter("from", "\""+ from +  "\"");
+        resource.getReference().addQueryParameter("to", "\"" + to +  "\"");
+        /*resource.getReference().addQueryParameter("from", from.toString());
+        resource.getReference().addQueryParameter("to", to.toString() );*/
+        //ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
         logger.trace("DATA ResourceUsage getResourceUsageData...: url=" + url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
@@ -80,6 +93,44 @@ public class UDRServiceClient extends ClientResource {
             logger.trace("DATA ResourceUsage getResourceUsageData...: resultArray=" + resultArray);
             for (int i = 0; i < resultArray.length(); i++) {
                 resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), ResourceUsage.class));
+            }
+            logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
+        } catch (JSONException e) {
+            logger.error("EXCEPTION JSONEXCEPTION ResourceUsage getResourceUsageData...");
+            e.printStackTrace();
+        }
+        logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
+        logger.trace("END ResourceUsage getResourceUsageData(String resourceName, String from, String to) throws IOException");
+        return resourceUsageData;
+    }
+
+
+    public ArrayList<TSDBData> getUDRData(String from, String to) throws IOException {
+        logger.trace("BEGIN ArrayList<ResourceUsage> getUDRData(String from, String to) throws IOException");
+        ArrayList<TSDBData> resourceUsageData = new ArrayList<TSDBData>();
+        JSONArray resultArray;
+        ObjectMapper mapper = new ObjectMapper();
+
+        Client client = new Client(Protocol.HTTP);
+        ClientResource resource = new ClientResource(url + "/usage/time");
+        from = reformatDate(from.toString());
+        to = reformatDate(to.toString());
+        resource.getReference().addQueryParameter("from", from);
+        resource.getReference().addQueryParameter("to", to);
+        /*resource.getReference().addQueryParameter("from", from.toString());
+        resource.getReference().addQueryParameter("to", to.toString() );*/
+        //ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
+        logger.trace("DATA ResourceUsage getResourceUsageData...: url=" + url + "/usage/time?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
+        resource.get(MediaType.APPLICATION_JSON);
+        Representation output = resource.getResponseEntity();
+
+        try {
+            String outputText = output.getText();
+            resultArray = new JSONArray(outputText);
+            logger.trace("DATA ResourceUsage getResourceUsageData...: output=" + resultArray.toString());
+            logger.trace("DATA ResourceUsage getResourceUsageData...: resultArray=" + resultArray);
+            for (int i = 0; i < resultArray.length(); i++) {
+                resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), TSDBData.class));
             }
             logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
         } catch (JSONException e) {

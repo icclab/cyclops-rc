@@ -40,8 +40,10 @@ import java.util.HashMap;
  */
 public class ChargeResource extends ServerResource {
 
-    // will be used for API Endpoint counter statistics
+    // who am I?
     private String endpoint = "/charge";
+
+    // used as counter
     private APICallCounter counter = APICallCounter.getInstance();
 
     /**
@@ -57,7 +59,6 @@ public class ChargeResource extends ServerResource {
     @Get
     public Representation getChargeRecords(){
 
-        // increment appropriate endpoint counter
         counter.increment(endpoint);
 
         InfluxDBClient dbClient = new InfluxDBClient();
@@ -66,11 +67,11 @@ public class ChargeResource extends ServerResource {
         Representation response;
 
         String userid = getQueryValue("userid");
-        String fromDate = getQueryValue("from");
-        String toDate = getQueryValue("to");
+        String fromDate = normalizeDateAndTime(getQueryValue("from"));
+        String toDate = normalizeDateAndTime(getQueryValue("to"));
 
         //TODO: remove hard coded query
-        tsdbData = dbClient.getData("SELECT * FROM cdr6 WHERE userid='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'"); //changed to cdr3 from cdr till dump db
+        tsdbData = dbClient.getData("SELECT * FROM mcn_cdr WHERE userId='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         cdrMap.put("columns", tsdbData.getColumns());
         cdrMap.put("points", tsdbData.getPoints());
         response = constructResponse(cdrMap,userid,fromDate,toDate);
@@ -117,5 +118,15 @@ public class ChargeResource extends ServerResource {
         }
 
         return responseJson;
+    }
+
+    /**
+     * Remove ' character and replace T with a space
+     * @param time
+     * @return
+     */
+    private String normalizeDateAndTime(String time) {
+        String first = time.replace("'", "");
+        return first.replace("T", " ");
     }
 }

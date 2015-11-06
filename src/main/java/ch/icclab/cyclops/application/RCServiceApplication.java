@@ -17,7 +17,9 @@
 
 package ch.icclab.cyclops.application;
 
+import ch.icclab.cyclops.resource.client.TNovaClient;
 import ch.icclab.cyclops.resource.impl.*;
+import ch.icclab.cyclops.tnova.TNovaScheduler;
 import ch.icclab.cyclops.util.APICallCounter;
 import ch.icclab.cyclops.util.APICallEndpoint;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +56,7 @@ public class RCServiceApplication extends Application{
         // Router for the incoming the API request
         Router router = new Router();
 
-        // counter for endpoint usage
+        // get instance of the counter class
         APICallCounter counter = APICallCounter.getInstance();
 
         router.attach("/", RootResource.class);
@@ -71,6 +73,9 @@ public class RCServiceApplication extends Application{
 
         router.attach("/generate/{action}", GenerateResource.class);
         counter.registerEndpoint("/generate");
+
+        router.attach("/scheduler/{command}", TNovaClient.class);
+        counter.registerEndpoint("/scheduler");
 
         router.attach("/status", APICallEndpoint.class);
         counter.registerEndpoint("/status");
@@ -95,6 +100,7 @@ public class RCServiceApplication extends Application{
         Load load = new Load();
         if(load.configuration == null){
             load.configFile(getContext());
+            load.createDatabase();
         }
         logger.trace("END void loadConfiguration(Context context)");
     }
