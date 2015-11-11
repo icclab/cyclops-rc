@@ -39,14 +39,8 @@ public class CDREntry {
         this.userId = clientId;
 
         // compute price and save usage
-        this.price = model.computeCost(Double.parseDouble(udr.getUsedSeconds())); // TODO maybe change to long?
-        this.usage = udr.getUsedSeconds();
-
-//        // cdr records
-//        this.priceUnit = model.getPriceUnit();
-//        this.period = model.getPeriod();
-//        this.periodCost = model.getPeriodCost();
-//        this.setupCost = (udr.shouldAddSetupCost())? model.getSetupCost() : 0;
+        this.price = model.computeCost(Double.parseDouble(udr.getUsage()));
+        this.usage = udr.getUsage();
     }
 
     /**

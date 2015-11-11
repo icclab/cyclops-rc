@@ -57,23 +57,17 @@ public class RateResource extends ServerResource {
     private APICallCounter counter = APICallCounter.getInstance();
 
     public RateResource() {
-        logger.trace("BEGIN CONSTRUCTOR RateResource()");
-        logger.trace("END CONSTRUCTOR RateResource()");
     }
 
     public RateResource(InfluxDBClient mockDbClient) {
-        logger.trace("BEGIN CONSTRUCTOR RateResource(InfluxDBClient mockDbClient)");
         this.dbClient = mockDbClient;
-        logger.trace("END CONSTRUCTOR RateResource(InfluxDBClient mockDbClient)");
     }
 
     public RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate) {
-        logger.trace("BEGIN CONSTRUCTOR RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate)");
         this.dbClient = mockDbClient;
         this.resourceName = resourceName;
         this.fromDate = fromDate;
         this.toDate = toDate;
-        logger.trace("END CONSTRUCTOR RateResource(InfluxDBClient mockDbClient, String resourceName, String fromDate, String toDate)");
     }
 
     /**
@@ -89,8 +83,6 @@ public class RateResource extends ServerResource {
      */
     @Get
     public Representation getRate() throws IOException {
-        logger.trace("BEGIN Representation getRate() throws IOException");
-
         counter.increment(endpoint);
 
         TSDBData tsdbData = null;
@@ -113,7 +105,6 @@ public class RateResource extends ServerResource {
         tsdbData = dbClient.getData("SELECT time,rate FROM rate WHERE resource='"+resourceName+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         rateArr.put(resourceName, tsdbData.getPoints());
         response = constructGetRateResponse(rateArr, fromDate, toDate);
-        logger.trace("END Representation getRate() throws IOException");
         return response;
     }
 
@@ -132,7 +123,6 @@ public class RateResource extends ServerResource {
      * @return responseJson The response object in the JSON format
      */
     private Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate) {
-        logger.trace("BEGIN Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
         String jsonStr = null;
         JsonRepresentation responseJson = null;
 
@@ -152,10 +142,9 @@ public class RateResource extends ServerResource {
             jsonStr = mapper.writeValueAsString(responseObj);
             responseJson = new JsonRepresentation(jsonStr);
         } catch (JsonProcessingException e) {
-            logger.error("EXCEPTION JSONPROCESSINGEXCEPTION Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
+            logger.error("Error while constructing the response: "+e.getMessage());
             e.printStackTrace();
         }
-        logger.trace("END Representation constructGetRateResponse(HashMap rateArr, String fromDate, String toDate)");
         return responseJson;
     }
 
@@ -172,8 +161,6 @@ public class RateResource extends ServerResource {
      */
     @Post("json:json")
     public Representation setRate(Representation entity){
-        logger.trace("BEGIN Representation setRate(Representation entity)");
-
         counter.increment(endpoint);
 
         JsonRepresentation request;
@@ -195,14 +182,11 @@ public class RateResource extends ServerResource {
                 //TODO: saveDynamicRate
             }
         } catch (IOException e) {
-            logger.error("EXCEPTION IOEXCEPTION Representation setRate(Representation entity)");
             e.printStackTrace();
             // TODO: return error code for IOException and JSONException
         } catch (JSONException e) {
-            logger.error("EXCEPTION JSONEXCEPTION Representation setRate(Representation entity)");
             e.printStackTrace();
         }
-        logger.trace("END Representation setRate(Representation entity)");
         return null; //TODO: Construct & return a response (maybe return code 200)
     }
 
@@ -220,7 +204,6 @@ public class RateResource extends ServerResource {
      * @return TSDBData
      */
     protected TSDBData getResourceRate(String resourceName, String from, String to){
-        logger.trace("BEGIN TSDBData getResourceRate(String resourceName, String from, String to)");
         String query;
         TSDBData tsdbData;
         Double rate;
@@ -229,7 +212,6 @@ public class RateResource extends ServerResource {
         //TODO: replace hard coded query with helper method
         query = "SELECT rate FROM rate WHERE resource = '"+resourceName+"' AND time > \""+from+"\" AND time < \""+to+"\" ";
         tsdbData = dbClient.getData(query);
-        logger.trace("END TSDBData getResourceRate(String resourceName, String from, String to)");
         return tsdbData ;
     }
 
@@ -247,7 +229,6 @@ public class RateResource extends ServerResource {
      * @return boolean
      */
     private boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy) {
-        logger.trace("BEGIN boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
         boolean result = false;
         TSDBData rateData = new TSDBData();
         ArrayList<String> strArr = new ArrayList<String>();
@@ -287,7 +268,7 @@ public class RateResource extends ServerResource {
                 staticRate.put(key,rateJsonObj.get(key));
             }
         } catch (JSONException e) {
-            logger.error("EXCEPTION JSONEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
+            logger.error("Error while saving the Static Rate: "+e.getMessage());
             e.printStackTrace();
         }
         // Update the static hashmap containing the static rates
@@ -299,13 +280,10 @@ public class RateResource extends ServerResource {
         try {
             jsonData = mapper.writeValueAsString(rateData);
         } catch (JsonProcessingException e) {
-            logger.error("EXCEPTION JSONPROCESSINGEXCEPTION boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
+            logger.error("Error while saving the Static Rate: "+e.getMessage());
             e.printStackTrace();
         }
-
-        logger.trace("DATA boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy): jsonData="+jsonData);
         result = dbClient.saveData(jsonData);
-        logger.trace("END boolean saveStaticRate(JSONObject jsonObj, String ratingPolicy)");
         return result;
     }
 

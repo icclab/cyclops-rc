@@ -19,6 +19,7 @@ package ch.icclab.cyclops.resource.client;
 
 import ch.icclab.cyclops.model.McnBillingModel;
 import ch.icclab.cyclops.model.TSDBData;
+import ch.icclab.cyclops.resource.impl.GenerateResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,12 +97,6 @@ public class InfluxDBClient extends ClientResource {
         username = load.configuration.get("InfluxDBUsername");
         password = load.configuration.get("InfluxDBPassword");
         dbName = load.configuration.get("dbName");
-        //url = (url+"?writeDb="+dbName);
-        logger.trace("BEGIN boolean saveData(String data)");
-        logger.trace("DATA boolean saveData(String data): data=" + data);
-        logger.trace("DATA boolean saveData(String data): url=" + url);
-        //data = "[" + data + "]";
-        //System.out.println(data);
         InfluxDB influxDB = InfluxDBFactory.connect(url, username, password);
         Representation output;
         //TODO: small POJO object instead of String
@@ -157,7 +152,7 @@ public class InfluxDBClient extends ClientResource {
                 rate_policy = rate_policy.replace("\"", "");
                 resource = resource.replace("\"", "");
                 point = Point.measurement(data.split("name\":\"")[1].split("\"")[0])
-                        .field("resource", resource)
+                        .tag("resource", resource)
                         .field("rate", rate)
                         .field("rate_policy", rate_policy)
                         .build();
@@ -284,19 +279,13 @@ public class InfluxDBClient extends ClientResource {
     }
 
     private ArrayList<String[]> getPoints(String json) {
-        logger.trace("BEGIN ArrayList<String[]> getPoints(String json)");
         ArrayList<String[]> result = new ArrayList<String[]>();
         String[] split = json.split(":\\[")[2].split("],\\[");
-        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
         split[0] = split[0].substring(1);
         split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 2);
-        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
         for (int i = 0; i < split.length; i++) {
             result.add(split[i].split(","));
-            logger.trace("DATA ArrayList<String[]> getPoints(String json): result=" + split[i]);
         }
-        logger.trace("DATA ArrayList<String[]> getPoints(String json): split=" + Arrays.toString(split));
-        logger.trace("END ArrayList<String[]> getPoints(String json)");
         return result;
     }
 
@@ -502,4 +491,9 @@ public class InfluxDBClient extends ClientResource {
     private String getLastRateQuery(String resource) {
         return "SELECT rate FROM rate WHERE resource='" + resource + "' ORDER BY time DESC limit 1";
     }
+
+    private String getLastRatesAllResourcesQuery(){
+        return "SELECT rate FROM rate GROUP BY resource ORDER BY time DESC LIMIT 1";
+    }
+
 }

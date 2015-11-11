@@ -27,7 +27,7 @@ public class TNovaRunner implements Runnable{
     /**
      * Simple constructor that will create required connections
      */
-    protected TNovaRunner() {
+    public TNovaRunner() {
         dbClient = new InfluxDBClient();
         puller = new TNovaPuller();
         accounting = new AccountingClient();

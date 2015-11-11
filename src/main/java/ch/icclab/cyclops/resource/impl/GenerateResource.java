@@ -244,7 +244,6 @@ public class GenerateResource extends ServerResource {
      * @return boolean
      */
     private boolean saveRate(TSDBData rateObj) {
-        logger.trace("BEGIN boolean saveRate(TSDBData rateObj)");
         InfluxDBClient dbClient = new InfluxDBClient();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -253,14 +252,9 @@ public class GenerateResource extends ServerResource {
         try {
             jsonData = mapper.writeValueAsString(rateObj);
         } catch (JsonProcessingException e) {
-            logger.error("EXCEPTION JSONPROCESSINGEXCEPTION boolean saveRate(TSDBData rateObj)");
             e.printStackTrace();
         }
-        logger.trace("DATA boolean saveRate(TSDBData rateObj): jsonData="+jsonData);
-        System.out.println("Generated save rate into db " + jsonData);
         result = dbClient.saveData(jsonData);
-        System.out.println("Result " + result);
-        logger.trace("END boolean saveRate(TSDBData rateObj)");
         return result;
     }
 
@@ -275,34 +269,8 @@ public class GenerateResource extends ServerResource {
      */
     private TSDBData generateStaticRate() {
         //TODO: check if there is generic method to to return rateData
-        logger.trace("BEGIN TSDBData generateStaticRate()");
-        //ArrayList<Object> objArrNode;
-        //Iterator<Map.Entry<String, Object>> entries;
-        //Object key;
-
-        //ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
-       // TSDBData rateData = new TSDBData();
-/*
-        entries = load.getStaticRate().entrySet().iterator();
-        while(entries.hasNext()){
-            Map.Entry<String, Object> entry = entries.next();
-            key = entry.getKey();
-            objArrNode = new ArrayList<Object>();
-            objArrNode.add(key);
-            objArrNode.add(entry.getValue());
-            objArrNode.add("static");
-            objArr.add(objArrNode);
-        }*/
-
-        // Set the data object, so it can be saved later in DB
-        /*rateData.setName("rate");
-        rateData.setColumns(strArr);
-        rateData.setPoints(objArr);*/
-
         ArrayList<String> strArr = StringUtil.strArr("resource","rate","rate_policy");
         TSDBData rateData = createPOJOObject("rate", strArr, load.getStaticRate());
-        logger.trace("DATA TSDBData generateStaticRate(): rateData=" + rateData);
-        logger.trace("END TSDBData generateStaticRate()");
         return  rateData;
     }
 
@@ -566,7 +534,7 @@ public class GenerateResource extends ServerResource {
             for(String instance : instances){
                 //System.out.println("instanceid = " + instance);
                 //System.out.println("clientid = " + clientId);
-                String queryString = "SELECT sum(usedSeconds) FROM UDR WHERE clientId='" +
+                String queryString = "SELECT sum(usage) FROM UDR WHERE clientId='" +
                         clientId + "' AND instanceId='" + instance +
                         "' GROUP BY clientID,instanceID";
                 logger.trace("DATA TSDBData sumUsage(...): query=" + queryString);

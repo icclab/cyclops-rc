@@ -17,9 +17,8 @@
 
 package ch.icclab.cyclops.application;
 
-import ch.icclab.cyclops.resource.client.TNovaClient;
+import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.resource.impl.*;
-import ch.icclab.cyclops.tnova.TNovaScheduler;
 import ch.icclab.cyclops.util.APICallCounter;
 import ch.icclab.cyclops.util.APICallEndpoint;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +73,7 @@ public class RCServiceApplication extends Application{
         router.attach("/generate/{action}", GenerateResource.class);
         counter.registerEndpoint("/generate");
 
-        router.attach("/scheduler/{command}", TNovaClient.class);
+        router.attach("/scheduler/{command}", Endpoint.class);
         counter.registerEndpoint("/scheduler");
 
         router.attach("/status", APICallEndpoint.class);

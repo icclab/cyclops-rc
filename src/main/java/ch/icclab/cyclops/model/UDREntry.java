@@ -12,7 +12,7 @@ public class UDREntry {
     private String productType;
     private String flagSetupCost;
     private String to;
-    private String usedSeconds;
+    private String usage;
 
     /**
      * Will return boolean based on flagSetupCost
@@ -71,11 +71,11 @@ public class UDREntry {
         this.to = to;
     }
 
-    public String getUsedSeconds() {
-        return usedSeconds;
+    public String getUsage() {
+        return usage;
     }
 
-    public void setUsedSeconds(String usedSeconds) {
-        this.usedSeconds = usedSeconds;
+    public void setUsage(String usage) {
+        this.usage = usage;
     }
 }

@@ -3,8 +3,8 @@ RuleEngineUrl==http://localhost:8080/ruleengine/
 InfluxDBURL==http://localhost:8086
 CeilometerURL==http://ceilometer:8777/v2/
 AccountingServiceUrl==http://localhost
-InfluxDBUsername==user
-InfluxDBPassword==pass
+InfluxDBUsername==root
+InfluxDBPassword==root
 dbName==rc_service
 sensuFrequency==300
 localhost==http://localhost:8080/rc

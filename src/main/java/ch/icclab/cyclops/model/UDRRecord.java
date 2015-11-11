@@ -44,7 +44,7 @@ public class UDRRecord {
         Integer type = columns.indexOf("productType");
         //Integer flagSetupCost = columns.indexOf("flagSetupCost");
         Integer to = columns.indexOf("to");
-        Integer usedSeconds = columns.indexOf("usedSeconds");
+        Integer usage = columns.indexOf("usage");
 
         // iterate over all rows and fill the objects
         for (List<String> row : points) {
@@ -57,7 +57,7 @@ public class UDRRecord {
             entry.setProductType(row.get(type));
             //entry.setFlagSetupCost(row.get(flagSetupCost));
             entry.setTo(row.get(to));
-            entry.setUsedSeconds(row.get(usedSeconds));
+            entry.setUsage(row.get(usage));
 
             // now add it to the list
             list.add(entry);

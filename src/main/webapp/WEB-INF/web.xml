@@ -14,7 +14,7 @@
         <listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
     </listener>
     <listener>
-        <listener-class>ch.icclab.cyclops.tnova.TNovaListener</listener-class>
+        <listener-class>ch.icclab.cyclops.schedule.Listener</listener-class>
     </listener>
 
     <!--    <listener>
