@@ -79,17 +79,7 @@ public class RCServiceApplication extends Application{
         router.attach("/status", APICallEndpoint.class);
         counter.registerEndpoint("/status");
 
-        // but also start scheduler immediately
-        startInternalScheduler();
-
         return router;
-    }
-
-    /**
-     * Simply start internal scheduler for Event -> UDR
-     */
-    private void startInternalScheduler() {
-        Scheduler.getInstance().start();
     }
 
     /**

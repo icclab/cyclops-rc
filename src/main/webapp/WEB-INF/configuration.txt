@@ -7,4 +7,4 @@ InfluxDBUsername==someuser
 InfluxDBPassword==somepass
 dbName==rc_service
 schedulerFrequency==300
-localhost==http://localhost:8080/rc
+RCServiceUrl==http://localhost:8080/rc

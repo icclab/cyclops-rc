@@ -24,6 +24,7 @@ import ch.icclab.cyclops.resource.client.AccountingClient;
 import ch.icclab.cyclops.resource.client.InfluxDBClient;
 import ch.icclab.cyclops.resource.client.RuleEngineClient;
 import ch.icclab.cyclops.resource.client.UDRServiceClient;
+import ch.icclab.cyclops.schedule.Scheduler;
 import ch.icclab.cyclops.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -223,6 +224,8 @@ public class GenerateResource extends ServerResource {
 
         if(Flag.getMeteringType().equalsIgnoreCase("static")){
             rateObj = generateStaticRate();
+            //Once the rate is set to static we Start the scheduler
+            Scheduler.getInstance().start();
         }else{
             rateObj = generateDynamicRate();
         }

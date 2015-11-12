@@ -21,7 +21,7 @@ public class RateRunner implements Runnable {
     }
 
     private void regenerateRate() {
-        String url = Load.configuration.get("localhost");
+        String url = Load.configuration.get("RCServiceUrl");
         ClientResource clientResource = new ClientResource(url+"/generate/rate");
         clientResource.get();
     }
