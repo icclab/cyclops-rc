@@ -19,6 +19,7 @@ package ch.icclab.cyclops.application;
 
 import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.resource.impl.*;
+import ch.icclab.cyclops.schedule.Scheduler;
 import ch.icclab.cyclops.util.APICallCounter;
 import ch.icclab.cyclops.util.APICallEndpoint;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +50,6 @@ public class RCServiceApplication extends Application{
      * @return Restlet
      */
     public Restlet createInboundRoot(){
-        logger.trace("BEGIN Restlet createInboundRoot()");
         //Load the configuration files and flags
         loadConfiguration(getContext());
         // Router for the incoming the API request
@@ -79,9 +79,17 @@ public class RCServiceApplication extends Application{
         router.attach("/status", APICallEndpoint.class);
         counter.registerEndpoint("/status");
 
-        logger.trace("END Restlet createInboundRoot()");
+        // but also start scheduler immediately
+        startInternalScheduler();
 
         return router;
+    }
+
+    /**
+     * Simply start internal scheduler for Event -> UDR
+     */
+    private void startInternalScheduler() {
+        Scheduler.getInstance().start();
     }
 
     /**

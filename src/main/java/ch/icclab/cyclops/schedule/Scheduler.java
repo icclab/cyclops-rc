@@ -2,6 +2,7 @@ package ch.icclab.cyclops.schedule;
 
 import ch.icclab.cyclops.tnova.RateRunner;
 import ch.icclab.cyclops.tnova.TNovaRunner;
+import ch.icclab.cyclops.util.Load;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -47,8 +48,8 @@ public class Scheduler {
             executor = Executors.newSingleThreadScheduledExecutor();
 
             // start Usage records collection every full hour plus five minutes (13:05, 14:05, etc)
-            executor.scheduleAtFixedRate(new TNovaRunner(), 0, 300000, TimeUnit.MILLISECONDS);
-            executor.scheduleAtFixedRate(new RateRunner(), 0, 300000, TimeUnit.MICROSECONDS);
+            executor.scheduleAtFixedRate(new TNovaRunner(), 0, Integer.parseInt(Load.configuration.get("schedulerFrequency")), TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new RateRunner(), 0, Integer.parseInt(Load.configuration.get("schedulerFrequency")), TimeUnit.SECONDS);
         }
     }
 
