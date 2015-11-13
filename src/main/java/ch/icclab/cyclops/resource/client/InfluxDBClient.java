@@ -468,19 +468,23 @@ public class InfluxDBClient extends ClientResource {
         ArrayList<ArrayList<Object>> points = tsdbData.getPoints();
 
         //Depending on the result of the first query, if we don't have a rate for that period, we use the last rate on the db.
-        if(points.size()<1) {
+        if (points.size() < 1) {
             query = this.getLastRateQuery(resource);
             tsdbData = this.getData(query);
             columns = tsdbData.getColumns();
             points = tsdbData.getPoints();
         }
-
-        for (int i = 0; i < columns.size(); i++) {
-            if (columns.get(i).equals("rate"))
-                rateIndex = i;
-        }
-        rate = Double.parseDouble((String) points.get(0).get(rateIndex));
-
+        //If there is an entry before we generate a rate
+//        if (points.size() > 0) {
+            for (int i = 0; i < columns.size(); i++) {
+                if (columns.get(i).equals("rate"))
+                    rateIndex = i;
+            }
+            rate = Double.parseDouble((String) points.get(0).get(rateIndex));
+//        }
+//        else{
+//
+//        }
         return rate;
     }
 
@@ -492,7 +496,7 @@ public class InfluxDBClient extends ClientResource {
         return "SELECT rate FROM rate WHERE resource='" + resource + "' ORDER BY time DESC limit 1";
     }
 
-    private String getLastRatesAllResourcesQuery(){
+    private String getLastRatesAllResourcesQuery() {
         return "SELECT rate FROM rate GROUP BY resource ORDER BY time DESC LIMIT 1";
     }
 

@@ -79,6 +79,10 @@ public class RCServiceApplication extends Application{
         router.attach("/status", APICallEndpoint.class);
         counter.registerEndpoint("/status");
 
+        //Starting the scheduler once the routes are loaded.
+        Scheduler.getInstance().start();
+
+
         return router;
     }
 

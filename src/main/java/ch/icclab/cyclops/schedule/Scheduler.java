@@ -6,6 +6,7 @@ import ch.icclab.cyclops.util.Load;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -48,8 +49,8 @@ public class Scheduler {
             executor = Executors.newSingleThreadScheduledExecutor();
 
             // start Usage records collection every full hour plus five minutes (13:05, 14:05, etc)
-            executor.scheduleAtFixedRate(new TNovaRunner(), 0, Integer.parseInt(Load.configuration.get("schedulerFrequency")), TimeUnit.SECONDS);
             executor.scheduleAtFixedRate(new RateRunner(), 0, Integer.parseInt(Load.configuration.get("schedulerFrequency")), TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(new TNovaRunner(), 0, Integer.parseInt(Load.configuration.get("schedulerFrequency")), TimeUnit.SECONDS);
         }
     }
 
@@ -79,5 +80,9 @@ public class Scheduler {
         tnova.start();
         Thread rate = new Thread(new RateRunner());
         rate.start();
+        //TODO:Manu i have to use executorService.invokeAll because of listener so we are able to kill it
+//        ExecutorService executorService = Executors.newFixedThreadPool(2);
+//        executorService.invoke
+
     }
 }

@@ -46,7 +46,6 @@ import java.util.*;
  * Author: Srikanta
  * Created on: 25-Mar-15
  * Description: The class creates the charge data records and rate for resources when invoked.
- *
  */
 public class GenerateResource extends ServerResource {
     final static Logger logger = LogManager.getLogger(GenerateResource.class.getName());
@@ -79,7 +78,7 @@ public class GenerateResource extends ServerResource {
         logger.trace("END CONSTRUCTOR GenerateResource()");
     }
 
-    public GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient){
+    public GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient) {
         logger.trace("BEGIN CONSTRUCTOR GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient)");
         this.action = mockAction;
         this.dbClient = mockDbClient;
@@ -123,10 +122,10 @@ public class GenerateResource extends ServerResource {
         boolean tcdrResult = false;
 
         // Get the list of enabled resources
-        //enabledResourceList = getEnabledResources();
+        enabledResourceList = getEnabledResources();
         // Service the request
         //logger.trace("DATA String serviceRequest() throws IOException, JSONException: enabledResourceList="+enabledResourceList);
-        logger.trace("DATA String serviceRequest() throws IOException, JSONException: action="+action);
+        logger.trace("DATA String serviceRequest() throws IOException, JSONException: action=" + action);
         if (action.equalsIgnoreCase("rate")) {
             rateResult = generateRate();
         } else if (action.equalsIgnoreCase("cdr")) {
@@ -152,7 +151,7 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Get a list of meters which are selected
-     *
+     * <p>
      * Pseudo Code
      * 1. Connect to the UDR service to get a list of meters
      * 2. Store the meters which are selected
@@ -160,7 +159,6 @@ public class GenerateResource extends ServerResource {
      * @return ArrayList List containing the meters which are selected
      */
     private ArrayList getEnabledResources() {
-        logger.trace("BEGIN ArrayList getEnabledResources()");
         ArrayList enabledResourceList = new ArrayList();
         String meterData;
         JsonRepresentation responseJson;
@@ -169,15 +167,11 @@ public class GenerateResource extends ServerResource {
         JSONArray columnArr, tagArr, pointsArr;
         // Get the active meters from the meter API from UDR Service
         try {
-            logger.info("INFO ArrayList getEnabledResources(): Opening UDR Service Client");
             meterData = udrServiceClient.getActiveResources();
-            logger.info("DATA ArrayList getEnabledResources(): meterData=" + meterData.toString());
             responseJson = new JsonRepresentation(meterData);
-            logger.info("DATA ArrayList getEnabledResources(): responseJson=" + responseJson.toString());
             JSONObject jsonObj = responseJson.getJsonObject();
             columnArr = jsonObj.getJSONArray("columns");
             //tagArr = jsonObj.getJSONArray("tags");
-            logger.trace("DATA ArrayList getEnabledResources(): responseJson=" + responseJson.toString());
             for (int i = 0; i < columnArr.length(); i++) {
                 if ("metername".equals(columnArr.get(i))) {
                     meterNameIndex = i;
@@ -186,7 +180,6 @@ public class GenerateResource extends ServerResource {
                     meterStatusIndex = i;
                 }
             }
-            logger.info("DATA ArrayList getEnabledResources(): jsonObj" + jsonObj);
             pointsArr = jsonObj.getJSONArray("points");
             HashMap<String, String> enabledResourceMap = new HashMap<String, String>();
             for (int j = 0; j < pointsArr.length(); j++) {
@@ -203,41 +196,36 @@ public class GenerateResource extends ServerResource {
             logger.error("EXCEPTION JSONEXCEPTION ArrayList getEnabledResources()");
             e.printStackTrace();
         }
-        logger.info("DATA ArrayList getEnabledResources(): enabledResourceList" + enabledResourceList);
-        logger.trace("END ArrayList getEnabledResources()");
         return enabledResourceList;
     }
 
     /**
      * Initiated the generation of rate depending on the existing rating policy
-     *
+     * <p>
      * Pseudo Code
      * 1. Check for the rating policy
      * 2. Invoke the method to initiate the rate generation
      *
      * @return boolean
      */
-    private boolean generateRate(){
+    private boolean generateRate() {
         logger.trace("BEGIN boolean generateRate()");
         TSDBData rateObj;
         boolean result = false;
 
-        if(Flag.getMeteringType().equalsIgnoreCase("static")){
+        if (Flag.getMeteringType().equalsIgnoreCase("static")) {
             rateObj = generateStaticRate();
-            //Once the rate is set to static we Start the scheduler
-            Scheduler.getInstance().start();
-        }else{
+        } else {
             rateObj = generateDynamicRate();
         }
-        //System.out.println("Generated rate obj" + rateObj.getPoints().toString());
-        result = saveRate(rateObj);
-        logger.trace("END boolean generateRate()");
+        if (rateObj.getPoints().size() > 0)
+            result = saveRate(rateObj);
         return result;
     }
 
     /**
      * Saves a TSDB dataObj into the database
-     *
+     * <p>
      * Pseudo Code
      * 1. Create a TSDB client object (POJO object)
      * 2. Convert the data object into a json string
@@ -263,7 +251,7 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Generates the static rate for a resource
-     *
+     * <p>
      * Pseudo Code
      * 1. Get the current list of resources along with their static rates
      * 2. Create a dataObj consisting of the resources along with its resources.
@@ -272,12 +260,12 @@ public class GenerateResource extends ServerResource {
      */
     private TSDBData generateStaticRate() {
         //TODO: check if there is generic method to to return rateData
-        ArrayList<String> strArr = StringUtil.strArr("resource","rate","rate_policy");
+        ArrayList<String> strArr = StringUtil.strArr("resource", "rate", "rate_policy");
         TSDBData rateData = createPOJOObject("rate", strArr, load.getStaticRate());
-        return  rateData;
+        return rateData;
     }
 
-    private TSDBData createPOJOObject(String name, ArrayList<String> columns, HashMap entrySet){
+    private TSDBData createPOJOObject(String name, ArrayList<String> columns, HashMap entrySet) {
         ArrayList<Object> objArrNode;
         Iterator<Map.Entry<String, Object>> entries;
         Object key;
@@ -286,7 +274,7 @@ public class GenerateResource extends ServerResource {
 
         //TODO: parametrization of method
         entries = entrySet.entrySet().iterator();
-        while(entries.hasNext()){
+        while (entries.hasNext()) {
             Map.Entry<String, Object> entry = entries.next();
             key = entry.getKey();
             objArrNode = new ArrayList<Object>();
@@ -305,15 +293,14 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Generates the dynamic rate for a resource
-     *
+     * <p>
      * Pseudo Code
      * 1. For every resources, create a rate through a random function with the value between a range.
      *
      * @return TSDBData Data obj to be saved into the db
      */
-    private TSDBData generateDynamicRate(){
+    private TSDBData generateDynamicRate() {
         //TODO: replace with single method generateRate and parameter (static, dynamic)
-        logger.trace("BEGIN TSDBData generateDynamicRate()");
         double rate;
         Random rateGenerator = new Random();
         TSDBData rateData = new TSDBData();
@@ -322,10 +309,10 @@ public class GenerateResource extends ServerResource {
         ArrayList<ArrayList<Object>> objArr = new ArrayList<ArrayList<Object>>();
 
         // Iterate through the list and generate the rate for each enabled meters
-        for(int k=0;k<enabledResourceList.size();k++){
+        for (int k = 0; k < enabledResourceList.size(); k++) {
             //rate = getDynamicRate(enabledResourceList.get(k).toString());
             rate = rateGenerator.nextInt((3 - 1) + 1) + 1;
-            strArr = StringUtil.strArr("resource","rate","rate_policy");
+            strArr = StringUtil.strArr("resource", "rate", "rate_policy");
             //strArr.add("resource");
             //strArr.add("rate");
             //strArr.add("rate_policy");
@@ -339,14 +326,12 @@ public class GenerateResource extends ServerResource {
         rateData.setName("rate");
         rateData.setColumns(strArr);
         rateData.setPoints(objArr);
-        logger.trace("DATA TSDBData generateDynamicRate(): rateData="+rateData);
-        logger.trace("END TSDBData generateDynamicRate()");
         return rateData;
     }
 
     /**
      * Request for generating the dynamic rate from the rule engine
-     *
+     * <p>
      * Pseudo Code
      * 1. Connect to the rule engine
      * 2. Invoke the getRate method with the resource name
@@ -371,7 +356,7 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Generate the CDR of all the users for the selected meters
-     *
+     * <p>
      * Pseudo Code
      * 1. Get the list of selected meters
      * 2. Query the UDR service to get the usage information under these meters for all the users for a time period
@@ -408,13 +393,13 @@ public class GenerateResource extends ServerResource {
 
         from = time[1];
         to = time[0];
-        logger.trace("DATA boolean generateCdr() throws IOException, JSONException: enabledResourceList"+enabledResourceList);
+        logger.trace("DATA boolean generateCdr() throws IOException, JSONException: enabledResourceList" + enabledResourceList);
         for (int i = 0; i < enabledResourceList.size(); i++) {
             tsdbData = rateResource.getResourceRate(enabledResourceList.get(i).toString(), from, to);
             rate = calculateRate(tsdbData);
             resourceUsageArray = udrClient.getResourceUsageData(enabledResourceList.get(i).toString(), from, to);
             logger.trace("DATA boolean generateCdr() throws IOException, JSONException: resourceUsageStr" + resourceUsageArray);
-            for(ResourceUsage resource : resourceUsageArray){
+            for (ResourceUsage resource : resourceUsageArray) {
                 columnArr = resource.getColumn();
                 logger.trace("DATA boolean generateCdr()...: columnArr=" + Arrays.toString(columnArr.toArray()));
                 usageListArr = resource.getUsage();
@@ -465,7 +450,7 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Generate the CDR for T-Nova service
-     *
+     * <p>
      * Pseudo Code
      * 1. Get the list of selected meters
      * 2. Query the UDR service to get the usage information under these meters for all the users for a time period
@@ -526,22 +511,22 @@ public class GenerateResource extends ServerResource {
      * @param clientInstanceMap
      * @param dbClient
      */
-    private TSDBData getBillingModel(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient){
+    private TSDBData getBillingModel(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient) {
         logger.trace("BEGIN  TSDBData sumUsage(HashMap<String, ArrayList<String>> clientInstanceMap, InfluxDBClient dbClient)");
         ArrayList<TSDBData> UDRs = new ArrayList<TSDBData>();
         Iterator it = clientInstanceMap.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
+            Map.Entry pair = (Map.Entry) it.next();
             String clientId = pair.getKey().toString();
             ArrayList<String> instances = (ArrayList<String>) pair.getValue();
-            for(String instance : instances){
+            for (String instance : instances) {
                 //System.out.println("instanceid = " + instance);
                 //System.out.println("clientid = " + clientId);
                 String queryString = "SELECT sum(usage) FROM UDR WHERE clientId='" +
                         clientId + "' AND instanceId='" + instance +
                         "' GROUP BY clientID,instanceID";
                 logger.trace("DATA TSDBData sumUsage(...): query=" + queryString);
-               // TSDBData[] lastEvent = dbClient.query(queryString);
+                // TSDBData[] lastEvent = dbClient.query(queryString);
                 //sends the event to array
                 //lastEvents.add(lastEvent[0]);
             }
@@ -560,16 +545,15 @@ public class GenerateResource extends ServerResource {
      * @return
      */
 
-    private ArrayList<String> concatColumns(ArrayList<String> ... columns){
-        if(columns.length < 1){
+    private ArrayList<String> concatColumns(ArrayList<String>... columns) {
+        if (columns.length < 1) {
             return null;
-        }
-        else if (columns.length < 2){
+        } else if (columns.length < 2) {
             return columns[0];
         } else {
             ArrayList<String> concatenated = new ArrayList<String>();
-            for(ArrayList<String> column : columns){
-                for(String col : column){
+            for (ArrayList<String> column : columns) {
+                for (String col : column) {
                     concatenated.add(col);
                 }
             }
@@ -578,16 +562,15 @@ public class GenerateResource extends ServerResource {
         }
     }
 
-    private ArrayList<Object> concatPoints(ArrayList<Object> ... points){
-        if(points.length < 1){
+    private ArrayList<Object> concatPoints(ArrayList<Object>... points) {
+        if (points.length < 1) {
             return null;
-        }
-        else if (points.length < 2){
+        } else if (points.length < 2) {
             return points[0];
         } else {
             ArrayList<Object> concatenated = new ArrayList<Object>();
-            for(ArrayList<Object> point : points){
-                for(Object pt : point){
+            for (ArrayList<Object> point : points) {
+                for (Object pt : point) {
                     concatenated.add(pt);
                 }
             }
@@ -604,10 +587,10 @@ public class GenerateResource extends ServerResource {
      * @param tsdbData
      * @return
      */
-    private HashMap<String,ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData){
+    private HashMap<String, ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData) {
         logger.trace("BEGIN HashMap<String,ArrayList<String>> getInstanceIdsPerClientId(TSDBData[] tsdbData)");
-        HashMap<String,ArrayList<String>> map = new HashMap<String,ArrayList<String>>();
-        for(TSDBData obj : tsdbData){
+        HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
+        for (TSDBData obj : tsdbData) {
             ArrayList<String> columns = obj.getColumns();
             ArrayList<ArrayList<Object>> points = obj.getPoints();
             int clientidIndex = -1;
@@ -621,13 +604,13 @@ public class GenerateResource extends ServerResource {
             for (int i = 0; i < points.size(); i++) {
                 String clientId = points.get(i).get(clientidIndex).toString();
                 String InstanceId = points.get(i).get(instanceidIndex).toString();
-                if (!(map.containsKey(clientId))){
+                if (!(map.containsKey(clientId))) {
                     map.put(clientId, new ArrayList<String>());
-                    if (!(map.get(clientId).contains(InstanceId))){
+                    if (!(map.get(clientId).contains(InstanceId))) {
                         map.get(clientId).add(InstanceId);
                     }
                 } else {
-                    if (!(map.get(clientId).contains(InstanceId))){
+                    if (!(map.get(clientId).contains(InstanceId))) {
                         map.get(clientId).add(InstanceId);
                     }
 
@@ -640,7 +623,7 @@ public class GenerateResource extends ServerResource {
 
     /**
      * Calculate the average rate for a time period
-     *
+     * <p>
      * Pseudo Code
      * 1. Get the array of rates for a resource
      * 2. Add the rates and get the average value
@@ -658,19 +641,19 @@ public class GenerateResource extends ServerResource {
 
         rateIndex = tsdbData.getColumns().indexOf("rate");
         rateDataPoints = tsdbData.getPoints().size();
-        for (int i=0; i<tsdbData.getPoints().size();i++){
+        for (int i = 0; i < tsdbData.getPoints().size(); i++) {
             dataPointsArray = tsdbData.getPoints().get(i);
-            rate = rate + Double.parseDouble(dataPointsArray.get(rateIndex)+"");
+            rate = rate + Double.parseDouble(dataPointsArray.get(rateIndex) + "");
         }
-        logger.trace("DATA Double calculateRate(TSDBData tsdbData): rate="+rate);
-        rate = rate/tsdbData.getPoints().size();
+        logger.trace("DATA Double calculateRate(TSDBData tsdbData): rate=" + rate);
+        rate = rate / tsdbData.getPoints().size();
         logger.trace("END Double calculateRate(TSDBData tsdbData)");
         return rate;
     }
 
     /**
      * Save the price generated into the DB
-     *
+     * <p>
      * Pseudo Code
      * 1. Create the dataobj containing the details
      * 2. Save it into the db
@@ -697,7 +680,7 @@ public class GenerateResource extends ServerResource {
         pricingData.setColumns(strArr);
         pricingData.setPoints(objArr);
         //get tags and put them into pricingData
-        logger.trace("DATA boolean savePrice(ArrayList<ArrayList<Object>> objArr): pricingData="+pricingData);
+        logger.trace("DATA boolean savePrice(ArrayList<ArrayList<Object>> objArr): pricingData=" + pricingData);
 
         try {
             jsonData = mapper.writeValueAsString(pricingData);
@@ -707,7 +690,7 @@ public class GenerateResource extends ServerResource {
         }
 
         //System.out.println(jsonData);
-        logger.trace("DATA boolean savePrice(ArrayList<ArrayList<Object>> objArr): jsonData="+jsonData);
+        logger.trace("DATA boolean savePrice(ArrayList<ArrayList<Object>> objArr): jsonData=" + jsonData);
         result = dbClient.saveData(jsonData);
         logger.trace("END boolean savePrice(ArrayList<ArrayList<Object>> objArr)");
         return result;
