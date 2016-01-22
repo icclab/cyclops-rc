@@ -19,7 +19,8 @@ package ch.icclab.cyclops.resource.impl;
 
 import ch.icclab.cyclops.model.ChargeResponse;
 import ch.icclab.cyclops.model.TSDBData;
-import ch.icclab.cyclops.resource.client.InfluxDBClient;
+import ch.icclab.cyclops.database.InfluxDBClient;
+import ch.icclab.cyclops.util.APICallCounter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.restlet.ext.json.JsonRepresentation;
@@ -39,6 +40,12 @@ import java.util.HashMap;
  */
 public class ChargeResource extends ServerResource {
 
+    // who am I?
+    private String endpoint = "/charge";
+
+    // used as counter
+    private APICallCounter counter = APICallCounter.getInstance();
+
     /**
      * Queries the database to get the charge data records for a given time period
      *
@@ -52,16 +59,19 @@ public class ChargeResource extends ServerResource {
     @Get
     public Representation getChargeRecords(){
 
+        counter.increment(endpoint);
+
         InfluxDBClient dbClient = new InfluxDBClient();
         HashMap cdrMap = new HashMap();
         TSDBData tsdbData;
         Representation response;
 
         String userid = getQueryValue("userid");
-        String fromDate = getQueryValue("from");
-        String toDate = getQueryValue("to");
+        String fromDate = normalizeDateAndTime(getQueryValue("from"));
+        String toDate = normalizeDateAndTime(getQueryValue("to"));
 
-        tsdbData = dbClient.getData("SELECT * FROM cdr WHERE userid='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
+        //TODO: remove hard coded query
+        tsdbData = dbClient.getData("SELECT * FROM mcn_cdr WHERE userId='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         cdrMap.put("columns", tsdbData.getColumns());
         cdrMap.put("points", tsdbData.getPoints());
         response = constructResponse(cdrMap,userid,fromDate,toDate);
@@ -108,5 +118,15 @@ public class ChargeResource extends ServerResource {
         }
 
         return responseJson;
+    }
+
+    /**
+     * Remove ' character and replace T with a space
+     * @param time
+     * @return
+     */
+    private String normalizeDateAndTime(String time) {
+        String first = time.replace("'", "");
+        return first.replace("T", " ");
     }
 }

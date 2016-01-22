@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.resource.impl;
 
 import ch.icclab.cyclops.model.RateStatusResponse;
+import ch.icclab.cyclops.util.APICallCounter;
 import ch.icclab.cyclops.util.Flag;
 import ch.icclab.cyclops.util.Load;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,12 @@ import org.restlet.resource.ServerResource;
  */
 public class RateStatusResource extends ServerResource {
 
+    // who am I?
+    private String endpoint = "/rate/status";
+
+    // used as counter
+    private APICallCounter counter = APICallCounter.getInstance();
+
     /**
      * Gets the rate of a resource
      *
@@ -46,6 +53,9 @@ public class RateStatusResource extends ServerResource {
      */
     @Get
     public Representation getRate(){
+
+        counter.increment(endpoint);
+
         if(Flag.getMeteringType().equalsIgnoreCase("static")){
             // Construct the response
             return buildStaticRateResponse();
@@ -55,6 +65,7 @@ public class RateStatusResource extends ServerResource {
         }
     }
 
+    //TODO: parametrize these two methods and replace it with one
     /**
      * Build the static rate of a resource
      *
@@ -76,8 +87,8 @@ public class RateStatusResource extends ServerResource {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        JsonRepresentation jsoneResp = new JsonRepresentation(jsonStr);
-        return jsoneResp;
+        JsonRepresentation jsonResp = new JsonRepresentation(jsonStr);
+        return jsonResp;
     }
 
     /**
@@ -100,7 +111,7 @@ public class RateStatusResource extends ServerResource {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        JsonRepresentation jsoneResp = new JsonRepresentation(jsonStr);
-        return jsoneResp;
+        JsonRepresentation jsonResp = new JsonRepresentation(jsonStr);
+        return jsonResp;
     }
 }

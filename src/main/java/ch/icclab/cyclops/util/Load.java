@@ -17,6 +17,8 @@
 
 package ch.icclab.cyclops.util;
 
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.representation.FileRepresentation;
@@ -36,6 +38,7 @@ import java.util.HashMap;
  *
  */
 public class Load {
+    private InfluxDB influxDB;
     public static HashMap<String,String> configuration;
     private static HashMap staticRate;
 
@@ -68,5 +71,18 @@ public class Load {
             System.out.println("Failed to load the Config file");
             e.printStackTrace();
         }
+    }
+
+    public void createDatabase(){
+        influxDB = InfluxDBFactory.connect(configuration.get("InfluxDBURL"), configuration.get("InfluxDBUsername"), configuration.get("InfluxDBPassword"));
+        influxDB.createDatabase(configuration.get("dbName"));
+    }
+
+    /**
+     * Simply return UDRServiceURL from configuration file
+     * @return
+     */
+    public String getUDREndpointURL() {
+        return configuration.get("UDRServiceUrl");
     }
 }

@@ -1,0 +1,17 @@
+######################## PROVIDE CREDENTIALS ####################
+# Connection to your TimeSeries database
+InfluxDBURL=http://localhost:8086
+InfluxDBPassword=root
+InfluxDBUsername=root
+
+# Connection to your UDR deployment
+UDRServiceUrl=http://localhost:8080/udr
+
+######################## ADVANCED SETTINGS ######################
+# Frequency has to be in seconds
+SchedulerFrequency=300
+Environment=Openstack
+
+# Where should we save CDR records?
+dbName=rc_service
+eventsDbName=event

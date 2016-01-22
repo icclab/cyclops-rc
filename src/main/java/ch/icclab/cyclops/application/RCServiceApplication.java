@@ -17,7 +17,13 @@
 
 package ch.icclab.cyclops.application;
 
+import ch.icclab.cyclops.applicationFactory.AbstractApplicationFactory;
+import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.resource.impl.*;
+import ch.icclab.cyclops.schedule.Scheduler;
+import ch.icclab.cyclops.util.APICallCounter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.restlet.Application;
 import org.restlet.Context;
 import org.restlet.Restlet;
@@ -32,45 +38,11 @@ import ch.icclab.cyclops.util.Load;
  *
  */
 public class RCServiceApplication extends Application{
+    final static Logger logger = LogManager.getLogger(RCServiceApplication.class.getName());
 
-    /**
-     * Loads the configuration file at the beginning of the application startup
-     *
-     * Pseudo Code
-     * 1. Load the config file
-     * 2. Route the incoming API request to its corresponding resource class
-     *
-     * @return Restlet
-     */
+    @Override
     public Restlet createInboundRoot(){
-        //Load the configuration files and flags
-        loadConfiguration(getContext());
-        // Router for the incoming the API request
-        Router router = new Router();
-        router.attach("/", RootResource.class);
-        router.attach("/rate", RateResource.class);
-        router.attach("/rate/status", RateStatusResource.class);
-        router.attach("/charge", ChargeResource.class);
-        router.attach("/generate/{action}", GenerateResource.class);
-
-        return router;
-    }
-
-    /**
-     * Loads the configuration file at the beginning of the application startup
-     *
-     * Pseudo Code
-     * 1. Create the LoadConfiguration class
-     * 2. Load the file if the the existing instance of the class is empty
-     *
-     * @param context
-     * @return Void
-     */
-    private void loadConfiguration(Context context){
-        Load load = new Load();
-        if(load.configuration == null){
-            load.configFile(getContext());
-        }
+        return AbstractApplicationFactory.getApplication(getContext());
     }
 
 }

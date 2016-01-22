@@ -25,16 +25,16 @@ import java.util.HashMap;
  * Description: The class is used to create a response for a cahrge request for a user
  */
 public class ChargeResponse {
-    private String userid;
+    private String userId;
     private HashMap time;
     private HashMap charge;
 
     public String getUserid() {
-        return userid;
+        return userId;
     }
 
     public void setUserid(String userid) {
-        this.userid = userid;
+        this.userId = userid;
     }
 
     public HashMap getTime() {

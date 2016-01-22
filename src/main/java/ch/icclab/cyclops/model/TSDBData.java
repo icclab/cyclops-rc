@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Author: Srikanta
@@ -29,6 +30,7 @@ public class TSDBData {
     private String name;
     private ArrayList<String> columns;
     private ArrayList<ArrayList<Object>> points;
+    private HashMap tags;
 
     public String getName() {
         return name;
@@ -52,5 +54,13 @@ public class TSDBData {
 
     public void setPoints(ArrayList<ArrayList<Object>> points) {
         this.points = points;
+    }
+
+    public HashMap getTags() {
+        return tags;
+    }
+
+    public void setTags(HashMap tags) {
+        this.tags = tags;
     }
 }

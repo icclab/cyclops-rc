@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Author: Srikanta
@@ -29,6 +30,7 @@ public class ResourceUsage {
     private TimeStamp time;
     private ArrayList<String> column;
     private ArrayList<ArrayList<Object>> usage;
+    private HashMap tags;
 
     public String getResourceid() {
         return resourceid;
@@ -77,6 +79,14 @@ public class ResourceUsage {
 
     public ArrayList<ArrayList<Object>> getUsage() {
         return usage;
+    }
+
+    public HashMap getTags() {
+        return tags;
+    }
+
+    public void setTags(HashMap tags) {
+        this.tags = tags;
     }
 
     public void setUsage(ArrayList<ArrayList<Object>> usage) {

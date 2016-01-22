@@ -1,3 +1,10 @@
+Version 0.2.2
+Date 15/Jan/2016
+Notes
+1. Added support for CloudStack
+
+*********************************************************
+
 Version 0.2.1
 Date 10/Aug/2015
 Notes

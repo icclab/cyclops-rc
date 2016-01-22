@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <File name="rc" filename="/var/log/cyclops/rc.log" append="true">
+            <PatternLayout pattern="[ %-6p] %d{yyyy-MM-dd HH:mm:ss} (%C{2}:%L) - %m%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.apache.log4j.xml" additivity="false" level="TRACE"/>
+        <Logger name="ch.icclab.cyclops.application.RCServiceApplication" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
+        <Logger name="ch.icclab.cyclops.resource.impl.GenerateResource" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
+        <Logger name="ch.icclab.cyclops.resource.impl.RateResource" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
+        <Logger name="ch.icclab.cyclops.resource.client.UDRServiceClient" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
+        <Logger name="ch.icclab.cyclops.usecases.tnova.client.AccountingClient" additivity="false" level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Logger>
+        <Root level="TRACE">
+            <AppenderRef ref="rc"/>
+        </Root>
+    </Loggers>
+</Configuration>
