@@ -7,7 +7,7 @@
     </Appenders>
     <Loggers>
         <Logger name="org.apache.log4j.xml" additivity="false" level="TRACE"/>
-        <Logger name="ch.icclab.cyclops.application.RCServiceApplication" additivity="false" level="TRACE">
+        <Logger name="ch.icclab.cyclops.application.OpenstackRCServiceApplication" additivity="false" level="TRACE">
             <AppenderRef ref="rc"/>
         </Logger>
         <Logger name="ch.icclab.cyclops.resource.impl.GenerateResource" additivity="false" level="TRACE">

@@ -269,7 +269,6 @@ public class RateResource extends ServerResource {
             }
         } catch (JSONException e) {
             logger.error("Error while saving the Static Rate: "+e.getMessage());
-            e.printStackTrace();
         }
         // Update the static hashmap containing the static rates
         load.setStaticRate(staticRate);

@@ -69,31 +69,25 @@ public class GenerateResource extends ServerResource {
     private APICallCounter counter = APICallCounter.getInstance();
 
     public GenerateResource() {
-        logger.trace("BEGIN CONSTRUCTOR GenerateResource()");
         this.enabledResourceList = new ArrayList();
         this.udrServiceClient = new UDRServiceClient();
         this.accountingClient = new AccountingClient();
         this.load = new Load();
         this.dbClient = new InfluxDBClient();
-        logger.trace("END CONSTRUCTOR GenerateResource()");
     }
 
     public GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient) {
-        logger.trace("BEGIN CONSTRUCTOR GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient)");
         this.action = mockAction;
         this.dbClient = mockDbClient;
         this.udrServiceClient = mockUdrServiceClient;
         this.enabledResourceList = new ArrayList();
         this.load = new Load();
-        logger.trace("END CONSTRUCTOR GenerateResource(String mockAction, InfluxDBClient mockDbClient, UDRServiceClient mockUdrServiceClient)");
     }
 
     public GenerateResource(UDRServiceClient udrServiceClient) {
-        logger.trace("BEGIN CONSTRUCTOR GenerateResource(UDRServiceClient udrServiceClient)");
         this.udrServiceClient = udrServiceClient;
         this.enabledResourceList = new ArrayList();
         this.load = new Load();
-        logger.trace("END CONSTRUCTOR GenerateResource(UDRServiceClient udrServiceClient)");
     }
 
     /**
@@ -113,10 +107,8 @@ public class GenerateResource extends ServerResource {
      */
     @Get
     public String serviceRequest() throws Exception {
-
         counter.increment(endpoint);
 
-        logger.trace("BEGIN String serviceRequest() throws IOException, JSONException");
         boolean rateResult = false;
         boolean cdrResult = false;
         boolean tcdrResult = false;
@@ -125,7 +117,6 @@ public class GenerateResource extends ServerResource {
         enabledResourceList = getEnabledResources();
         // Service the request
         //logger.trace("DATA String serviceRequest() throws IOException, JSONException: enabledResourceList="+enabledResourceList);
-        logger.trace("DATA String serviceRequest() throws IOException, JSONException: action=" + action);
         if (action.equalsIgnoreCase("rate")) {
             rateResult = generateRate();
         } else if (action.equalsIgnoreCase("cdr")) {
@@ -135,16 +126,12 @@ public class GenerateResource extends ServerResource {
         }
         // Construct the response
         if (rateResult) {
-            logger.trace("END String serviceRequest() throws IOException, JSONException");
             return "The rate generation was successful";
         } else if (cdrResult) {
-            logger.trace("END String serviceRequest() throws IOException, JSONException");
             return "The cdr generation was successful";
         } else if (tcdrResult) {
-            logger.trace("END String serviceRequest() throws IOException, JSONException");
             return "The T-Nova cdr generation was successful";
         } else {
-            logger.debug("DEBUG String serviceRequest() throws IOException, JSONException: Operation failed");
             return "Operation Failed";
         }
     }
@@ -368,12 +355,11 @@ public class GenerateResource extends ServerResource {
      */
     private boolean generateCdr() throws IOException, JSONException {
         //TODO: split it into smaller methods
-        logger.trace("BEGIN boolean generateCdr() throws IOException, JSONException");
         Object usage;
         double charge;
         String from, to;
         String[] time;
-        int indexUserId, indexUsage;
+        int  indexUsage;
         ArrayList usageListArr, usageArr;
         ArrayList columnArr;
         UDRServiceClient udrClient = new UDRServiceClient();
@@ -384,7 +370,6 @@ public class GenerateResource extends ServerResource {
         boolean result;
         String userid;
         ArrayList<ResourceUsage> resourceUsageArray;
-        ArrayList<Object> objArrNode;
         HashMap tags;
         POJOUtil pojoUtil = new POJOUtil();
 
@@ -393,23 +378,17 @@ public class GenerateResource extends ServerResource {
 
         from = time[1];
         to = time[0];
-        logger.trace("DATA boolean generateCdr() throws IOException, JSONException: enabledResourceList" + enabledResourceList);
         for (int i = 0; i < enabledResourceList.size(); i++) {
             tsdbData = rateResource.getResourceRate(enabledResourceList.get(i).toString(), from, to);
             rate = calculateRate(tsdbData);
             resourceUsageArray = udrClient.getResourceUsageData(enabledResourceList.get(i).toString(), from, to);
-            logger.trace("DATA boolean generateCdr() throws IOException, JSONException: resourceUsageStr" + resourceUsageArray);
             for (ResourceUsage resource : resourceUsageArray) {
                 columnArr = resource.getColumn();
-                logger.trace("DATA boolean generateCdr()...: columnArr=" + Arrays.toString(columnArr.toArray()));
                 usageListArr = resource.getUsage();
                 tags = resource.getTags();
-                logger.trace("DATA boolean generateCdr()...: tags=" + tags);
                 //indexUserId = columnArr.indexOf("userid");
                 userid = tags.get("userid").toString();
                 //userid = userid.substring(0, userid.length());
-                logger.trace("DATA boolean generateCdr()...: userid=" + userid);
-                logger.trace("DATA boolean generateCdr()...: usageListArr=" + usageListArr.toString());
                 indexUsage = columnArr.indexOf("mean");
                 // The below if condition differentiates between the gauge and cumulative meters of openstack
                 if (indexUsage < 0) {
@@ -419,13 +398,11 @@ public class GenerateResource extends ServerResource {
                 // Multiple the usage with the rate of the resource and save it into an arraylist
                 for (int j = 0; j < usageListArr.size(); j++) {
                     usageArr = (ArrayList) usageListArr.get(j);
-                    logger.trace("DATA boolean generateCdr()...: indexUsage=" + indexUsage);
                     usage = usageArr.get(indexUsage);
                     // Calculate the charge for a resource per user
                     Double d = Double.parseDouble(usage.toString());
                     charge = (d * rate);
                     String resources = enabledResourceList.get(i).toString();
-                    logger.trace("DATA boolean generateCdr()...: objArr=" + Arrays.toString(objArr.toArray()));
                     objArr = pojoUtil.populateList(usageListArr, objArr, resources, userid, usage, charge);
                     /*for (int k = 0; k < usageListArr.size(); k++) {//resourceUsageStr.get(usage).size()
                         objArrNode = new ArrayList<Object>();
@@ -443,7 +420,6 @@ public class GenerateResource extends ServerResource {
         }
         // Save the charge array into the database
         result = savePrice(objArr);
-        logger.trace("END boolean generateCdr() throws IOException, JSONException");
         return result;
     }
 

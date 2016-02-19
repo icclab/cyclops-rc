@@ -24,12 +24,9 @@ import ch.icclab.cyclops.schedule.runner.AbstractRunner;
 import ch.icclab.cyclops.usecases.tnova.model.RevenueSharingEntry;
 import ch.icclab.cyclops.usecases.tnova.model.TnovaCDREntry;
 import ch.icclab.cyclops.usecases.tnova.model.TnovaBillingModel;
-import com.sun.org.apache.bcel.internal.generic.GOTO;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.influxdb.dto.BatchPoints;
-
-import java.awt.*;
 
 /**
  * Author: Martin Skoviera
@@ -92,14 +89,16 @@ public class TNovaRunner extends AbstractRunner {
                         cdrFlag = true;
                         logger.debug("CDR Created.");
                         try {
-                            if (udrRow.getProductType().equalsIgnoreCase("service")) {
+                            if (udrRow.getProductType().equalsIgnoreCase("ns") || udrRow.getProductType().equalsIgnoreCase("vnf")) {
                                 logger.debug("Attempting to create Revenue Sharing report.");
                                 String[] relatives = udrRow.getRelatives().split(", ");
                                 BatchPoints revenueSharingContainer = dbClient.giveMeEmptyContainer();
-                                for (int i = 0; i < relatives.length; i++) {
-                                    RevenueSharingEntry revenueSharing = new RevenueSharingEntry(cdr, relatives[i], (TnovaBillingModel) billingModel);
-                                    revenueSharingContainer.point(revenueSharing.toDBPoint());
-                                }
+//                                for (int i = 0; i < relatives.length; i++) {
+//                                    RevenueSharingEntry revenueSharing = new RevenueSharingEntry(cdr, relatives[i], (TnovaBillingModel) billingModel);
+//                                    revenueSharingContainer.point(revenueSharing.toDBPoint());
+//                                }
+                                RevenueSharingEntry revenueSharing = new RevenueSharingEntry(cdr, udrRow.getInstanceId(), (TnovaBillingModel) billingModel);
+                                revenueSharingContainer.point(revenueSharing.toDBPoint());
                                 dbClient.saveContainerToDB(revenueSharingContainer);
                             }
                         } catch (Exception e) {
@@ -111,10 +110,10 @@ public class TNovaRunner extends AbstractRunner {
                     }
                 }
             }
+            logger.debug("Attempting to store CDRs in the database.");
             if (cdrFlag)
-                logger.debug("Attempting to store CDRs in the database.");
-            // and now finally save the container to DB
-            dbClient.saveContainerToDB(container);
+                // and now finally save the container to DB
+                dbClient.saveContainerToDB(container);
             if (cdrFlag)
                 logger.debug("CDRs Correctly stored.");
         }

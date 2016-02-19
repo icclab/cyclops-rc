@@ -65,8 +65,7 @@ public class UDRServiceClient extends ClientResource {
      * @return ResourceUsage
      */
     public ArrayList<ResourceUsage> getResourceUsageData(String resourceName, String from, String to) throws IOException {
-        logger.trace("BEGIN ResourceUsage getResourceUsageData(String resourceName, String from, String to) throws IOException");
-        logger.trace("DATA ResourceUsage getResourceUsageData...: resourceName=" + resourceName);
+        logger.debug("Attempting to get the Usage of the resource: "+resourceName);
         ArrayList<ResourceUsage> resourceUsageData = new ArrayList<ResourceUsage>();
         JSONArray resultArray;
         ObjectMapper mapper = new ObjectMapper();
@@ -75,20 +74,22 @@ public class UDRServiceClient extends ClientResource {
         ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName);
         from = reformatDate(from.toString());
         to = reformatDate(to.toString());
+//        resource.getReference().addQueryParameter("from", from);
+//        resource.getReference().addQueryParameter("to", to);
         resource.getReference().addQueryParameter("from", "\"" + from + "\"");
         resource.getReference().addQueryParameter("to", "\"" + to + "\"");
+//
         /*resource.getReference().addQueryParameter("from", from.toString());
         resource.getReference().addQueryParameter("to", to.toString() );*/
         //ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
-        logger.trace("DATA ResourceUsage getResourceUsageData...: url=" + url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
+        logger.debug("Sending request to UDR");
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
 
         try {
             String outputText = output.getText();
             resultArray = new JSONArray(outputText);
-            logger.trace("DATA ResourceUsage getResourceUsageData...: output=" + resultArray.toString());
-            logger.trace("DATA ResourceUsage getResourceUsageData...: resultArray=" + resultArray);
+            logger.debug("Obtained result: "+resultArray.toString());
             for (int i = 0; i < resultArray.length(); i++) {
                 resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), ResourceUsage.class));
             }

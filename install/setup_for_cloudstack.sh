@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-# Author: Martin Skoviera
+# Author: Piyush Harsh, Martin Skoviera
 
 echo "Configuring logging folder structure"
 touch /var/log/cyclops/rc.log
