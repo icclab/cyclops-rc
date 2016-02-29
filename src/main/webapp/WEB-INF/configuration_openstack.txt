@@ -1,17 +1,22 @@
-######################## PROVIDE CREDENTIALS ####################
-# Connection to your TimeSeries database
+#Cyclops RC Service configuration file
+
+#Environment variables
+Environment=Openstack
+
+#Cyclops variables
+UDRServiceUrl=http://localhost:8080/udr
+RuleEngineUrl=http://localhost:8080/ruleengine/
+RCServiceUrl=http://localhost:8080/rc
+
+#Tnova variables
+AccountingServiceUrl=http://localhost
+
+#Scheduler variables
+SchedulerFrequency=600
+
+#InfluxDB variables
 InfluxDBURL=http://localhost:8086
 InfluxDBPassword=root
 InfluxDBUsername=root
-
-# Connection to your UDR deployment
-UDRServiceUrl=http://localhost:8080/udr
-
-######################## ADVANCED SETTINGS ######################
-# Frequency has to be in seconds
-SchedulerFrequency=300
-Environment=Openstack
-
-# Where should we save CDR records?
 dbName=rc_service
 eventsDbName=event

@@ -53,7 +53,7 @@ public class ChargeResource extends ServerResource {
         TSDBData tsdbData;
         Representation response;
 
-        String userid = getQueryValue("userid");
+        String userid = getQueryValue("userId");
         String fromDate = normalizeDateAndTime(getQueryValue("from"));
         String toDate = normalizeDateAndTime(getQueryValue("to"));
 

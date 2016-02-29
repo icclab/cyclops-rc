@@ -119,7 +119,7 @@ public class InfluxDBClient extends ClientResource {
                 usageIndex = i;
             else if (columns[i].equals("price"))
                 priceIndex = i;
-            else if (columns[i].equals("userid"))
+            else if (columns[i].equals("userId"))
                 useridIndex = i;
         }
         for (int i = 0; i < points.size(); i++) {
@@ -137,7 +137,7 @@ public class InfluxDBClient extends ClientResource {
                         .field("resource", resource)
                         .field("usage", usage)
                         .field("price", price)
-                        .tag("userid", userid)
+                        .tag("userId", userid)
                         .build();
             } else {
                 String resource = points.get(i)[resourceIndex];

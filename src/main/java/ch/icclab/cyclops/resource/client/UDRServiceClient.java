@@ -82,7 +82,6 @@ public class UDRServiceClient extends ClientResource {
         /*resource.getReference().addQueryParameter("from", from.toString());
         resource.getReference().addQueryParameter("to", to.toString() );*/
         //ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
-        logger.debug("Sending request to UDR");
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
 
@@ -93,13 +92,10 @@ public class UDRServiceClient extends ClientResource {
             for (int i = 0; i < resultArray.length(); i++) {
                 resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), ResourceUsage.class));
             }
-            logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
         } catch (JSONException e) {
             logger.error("EXCEPTION JSONEXCEPTION ResourceUsage getResourceUsageData...");
             e.printStackTrace();
         }
-        logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
-        logger.trace("END ResourceUsage getResourceUsageData(String resourceName, String from, String to) throws IOException");
         return resourceUsageData;
     }
 
@@ -126,18 +122,12 @@ public class UDRServiceClient extends ClientResource {
         try {
             String outputText = output.getText();
             resultArray = new JSONArray(outputText);
-            logger.trace("DATA ResourceUsage getResourceUsageData...: output=" + resultArray.toString());
-            logger.trace("DATA ResourceUsage getResourceUsageData...: resultArray=" + resultArray);
             for (int i = 0; i < resultArray.length(); i++) {
                 resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), TSDBData.class));
             }
-            logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
         } catch (JSONException e) {
-            logger.error("EXCEPTION JSONEXCEPTION ResourceUsage getResourceUsageData...");
             e.printStackTrace();
         }
-        logger.trace("DATA ResourceUsage getResourceUsageData...: resourceUsageData=" + resourceUsageData);
-        logger.trace("END ResourceUsage getResourceUsageData(String resourceName, String from, String to) throws IOException");
         return resourceUsageData;
     }
 
@@ -151,15 +141,12 @@ public class UDRServiceClient extends ClientResource {
      * @return String
      */
     public String getActiveResources() throws IOException {
-        logger.trace("BEGIN String getActiveResources() throws IOException");
         Client client = new Client(Protocol.HTTP);
         ClientResource resource = new ClientResource(url + "/meters");
         resource.getRequest();
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
         String result = output.getText();
-        logger.trace("DATA String getActiveResources() throws IOException: output=" + result);
-        logger.trace("END String getActiveResources() throws IOException");
         return result;
     }
 }

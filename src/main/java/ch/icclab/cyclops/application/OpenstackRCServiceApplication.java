@@ -25,6 +25,7 @@ import ch.icclab.cyclops.resource.impl.RateResource;
 import ch.icclab.cyclops.resource.impl.RateStatusResource;
 import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.schedule.Scheduler;
+import ch.icclab.cyclops.services.iaas.openstack.CDRGeneration;
 import ch.icclab.cyclops.usecases.mcn.McnRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,6 +55,13 @@ public class OpenstackRCServiceApplication extends AbstractApplication{
         router.attach("/scheduler/{command}", Endpoint.class);
         counter.registerEndpoint("/scheduler");
 
+        startInternalScheduler();
+    }
+
+    private void startInternalScheduler() {
+        Scheduler scheduler = Scheduler.getInstance();
+        scheduler.addRunner(new CDRGeneration(), 0, Long.valueOf(Loader.getSettings().getSchedulerSettings().getSchedulerFrequency()), TimeUnit.SECONDS);
+        scheduler.start();
     }
 
     @Override

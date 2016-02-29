@@ -387,7 +387,7 @@ public class GenerateResource extends ServerResource {
                 usageListArr = resource.getUsage();
                 tags = resource.getTags();
                 //indexUserId = columnArr.indexOf("userid");
-                userid = tags.get("userid").toString();
+                userid = tags.get("userId").toString();
                 //userid = userid.substring(0, userid.length());
                 indexUsage = columnArr.indexOf("mean");
                 // The below if condition differentiates between the gauge and cumulative meters of openstack
@@ -649,10 +649,10 @@ public class GenerateResource extends ServerResource {
         String jsonData = null;
 
         strArr.add("resource");
-        strArr.add("userid");
+        strArr.add("userId");
         strArr.add("usage");
         strArr.add("price");
-        pricingData.setName("cdr3");//changed to cdr3 from cdr to avoid influxdb client problems till db is dumped
+        pricingData.setName("mcn_cdr");
         pricingData.setColumns(strArr);
         pricingData.setPoints(objArr);
         //get tags and put them into pricingData
