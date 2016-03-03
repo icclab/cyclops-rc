@@ -6,6 +6,7 @@ InfluxDBUsername=root
 
 # Connection to your UDR deployment
 UDRServiceUrl=http://localhost:8080/udr
+RCServiceUrl=http://localhost:8080/rc
 
 ######################## ADVANCED SETTINGS ######################
 # Frequency has to be in seconds

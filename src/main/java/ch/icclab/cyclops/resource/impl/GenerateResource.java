@@ -384,6 +384,7 @@ public class GenerateResource extends ServerResource {
             resourceUsageArray = udrClient.getResourceUsageData(enabledResourceList.get(i).toString(), from, to);
             for (ResourceUsage resource : resourceUsageArray) {
                 columnArr = resource.getColumn();
+
                 usageListArr = resource.getUsage();
                 tags = resource.getTags();
                 //indexUserId = columnArr.indexOf("userid");
