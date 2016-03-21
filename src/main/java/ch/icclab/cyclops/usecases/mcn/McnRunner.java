@@ -18,6 +18,7 @@
 package ch.icclab.cyclops.usecases.mcn;
 
 import ch.icclab.cyclops.database.InfluxDBClient;
+import ch.icclab.cyclops.load.Loader;
 import ch.icclab.cyclops.model.*;
 import ch.icclab.cyclops.schedule.runner.AbstractRunner;
 import ch.icclab.cyclops.usecases.mcn.model.McnBillingModel;
@@ -27,6 +28,8 @@ import ch.icclab.cyclops.usecases.mcn.model.McnUDRResponse;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.influxdb.dto.BatchPoints;
+import org.restlet.engine.Edition;
+import org.restlet.resource.ClientResource;
 
 /**
  * Author: Martin Skoviera
@@ -58,6 +61,10 @@ public class McnRunner extends AbstractRunner{
      */
     private void updateRecords() {
 
+        ClientResource clientResource = new ClientResource(Loader.getSettings().getCyclopsSettings().getRcServiceUrl()+"/generate/rate");
+        clientResource.get();
+        clientResource = new ClientResource(Loader.getSettings().getCyclopsSettings().getRcServiceUrl()+"/generate/cdr");
+        clientResource.get();
         // retrieve usage response from UDR micro-service
         McnUDRResponse response = puller.retrieveUsageResponseFromUDR();
 

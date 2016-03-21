@@ -64,7 +64,7 @@ public class UDRServiceClient extends ClientResource {
      * @param to           Timestamp for the ending date
      * @return ResourceUsage
      */
-    public ArrayList<ResourceUsage> getResourceUsageData(String resourceName, String from, String to) throws IOException {
+    public ArrayList<ResourceUsage> getResourceUsageData(String resourceName, String from, String to) {
         logger.debug("Attempting to get the Usage of the resource: "+resourceName);
         ArrayList<ResourceUsage> resourceUsageData = new ArrayList<ResourceUsage>();
         JSONArray resultArray;
@@ -74,17 +74,10 @@ public class UDRServiceClient extends ClientResource {
         ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName);
         from = reformatDate(from.toString());
         to = reformatDate(to.toString());
-//        resource.getReference().addQueryParameter("from", from);
-//        resource.getReference().addQueryParameter("to", to);
         resource.getReference().addQueryParameter("from", "\"" + from + "\"");
         resource.getReference().addQueryParameter("to", "\"" + to + "\"");
-//
-        /*resource.getReference().addQueryParameter("from", from.toString());
-        resource.getReference().addQueryParameter("to", to.toString() );*/
-        //ClientResource resource = new ClientResource(url + "/usage/resources/" + resourceName + "?from=\"" + from.toString() + "\"&to=\"" + to.toString() + "\"");
         resource.get(MediaType.APPLICATION_JSON);
         Representation output = resource.getResponseEntity();
-
         try {
             String outputText = output.getText();
             resultArray = new JSONArray(outputText);
@@ -92,9 +85,8 @@ public class UDRServiceClient extends ClientResource {
             for (int i = 0; i < resultArray.length(); i++) {
                 resourceUsageData.add(mapper.readValue(resultArray.get(i).toString(), ResourceUsage.class));
             }
-        } catch (JSONException e) {
-            logger.error("EXCEPTION JSONEXCEPTION ResourceUsage getResourceUsageData...");
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("Error while trying to get the resource usage data: "+e.getMessage());
         }
         return resourceUsageData;
     }

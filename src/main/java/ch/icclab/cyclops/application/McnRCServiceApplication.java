@@ -24,6 +24,7 @@ import ch.icclab.cyclops.resource.impl.RateResource;
 import ch.icclab.cyclops.resource.impl.RateStatusResource;
 import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.schedule.Scheduler;
+import ch.icclab.cyclops.services.iaas.openstack.CDRGeneration;
 import ch.icclab.cyclops.usecases.mcn.McnRunner;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -73,6 +74,8 @@ public class McnRCServiceApplication extends AbstractApplication {
 
             // add schedulers
             scheduler.addRunner(new McnRunner(), 0, frequency, TimeUnit.SECONDS);
+            //scheduler.addRunner(new CDRGeneration(), 0, frequency, TimeUnit.SECONDS);
+
 
             // start them up
             scheduler.start();

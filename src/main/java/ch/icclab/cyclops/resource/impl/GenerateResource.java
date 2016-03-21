@@ -106,7 +106,7 @@ public class GenerateResource extends ServerResource {
      * @return String
      */
     @Get
-    public String serviceRequest() throws Exception {
+    public String serviceRequest() {
         counter.increment(endpoint);
 
         boolean rateResult = false;
@@ -116,22 +116,29 @@ public class GenerateResource extends ServerResource {
         // Get the list of enabled resources
         enabledResourceList = getEnabledResources();
         // Service the request
-        //logger.trace("DATA String serviceRequest() throws IOException, JSONException: enabledResourceList="+enabledResourceList);
-        if (action.equalsIgnoreCase("rate")) {
-            rateResult = generateRate();
-        } else if (action.equalsIgnoreCase("cdr")) {
-            cdrResult = generateCdr();
-        } else if (action.equalsIgnoreCase("t-cdr")) {
-            tcdrResult = generateTNovaCdr();
-        }
-        // Construct the response
-        if (rateResult) {
-            return "The rate generation was successful";
-        } else if (cdrResult) {
-            return "The cdr generation was successful";
-        } else if (tcdrResult) {
-            return "The T-Nova cdr generation was successful";
-        } else {
+        try {
+            if (action.equalsIgnoreCase("rate")) {
+                logger.debug("Attempting to generate a Rate");
+                rateResult = generateRate();
+            } else if (action.equalsIgnoreCase("cdr")) {
+                logger.debug("Attempting to generate a CDR");
+                cdrResult = generateCdr();
+            } else if (action.equalsIgnoreCase("t-cdr")) {
+                logger.debug("Attempting to generate a CDR for T-nova");
+                tcdrResult = generateTNovaCdr();
+            }
+            // Construct the response
+            if (rateResult) {
+                return "The rate generation was successful";
+            } else if (cdrResult) {
+                return "The cdr generation was successful";
+            } else if (tcdrResult) {
+                return "The T-Nova cdr generation was successful";
+            } else {
+                return "Operation Failed";
+            }
+        }catch (Exception e){
+            logger.error("Error while generating it: "+e.getMessage());
             return "Operation Failed";
         }
     }
@@ -154,6 +161,7 @@ public class GenerateResource extends ServerResource {
         JSONArray columnArr, tagArr, pointsArr;
         // Get the active meters from the meter API from UDR Service
         try {
+            logger.debug("Attempting to get the Enabled Resources");
             meterData = udrServiceClient.getActiveResources();
             responseJson = new JsonRepresentation(meterData);
             JSONObject jsonObj = responseJson.getJsonObject();
@@ -176,11 +184,8 @@ public class GenerateResource extends ServerResource {
                         enabledResourceList.add(arr.get(meterNameIndex));
                 }
             }
-        } catch (IOException e) {
-            logger.error("EXCEPTION IOEXCEPTION ArrayList getEnabledResources()");
-            e.printStackTrace();
-        } catch (JSONException e) {
-            logger.error("EXCEPTION JSONEXCEPTION ArrayList getEnabledResources()");
+        } catch (Exception e) {
+            logger.error("Error while getting the Enabled Resources: "+e.getMessage());
             e.printStackTrace();
         }
         return enabledResourceList;
@@ -196,7 +201,6 @@ public class GenerateResource extends ServerResource {
      * @return boolean
      */
     private boolean generateRate() {
-        logger.trace("BEGIN boolean generateRate()");
         TSDBData rateObj;
         boolean result = false;
 
@@ -353,7 +357,7 @@ public class GenerateResource extends ServerResource {
      *
      * @return boolean
      */
-    private boolean generateCdr() throws IOException, JSONException {
+    private boolean generateCdr(){
         //TODO: split it into smaller methods
         Object usage;
         double charge;
@@ -405,16 +409,6 @@ public class GenerateResource extends ServerResource {
                     charge = (d * rate);
                     String resources = enabledResourceList.get(i).toString();
                     objArr = pojoUtil.populateList(usageListArr, objArr, resources, userid, usage, charge);
-                    /*for (int k = 0; k < usageListArr.size(); k++) {//resourceUsageStr.get(usage).size()
-                        objArrNode = new ArrayList<Object>();
-                        //userid = (String) usageArr.get(indexUserId);
-
-                        objArrNode.add(resources);
-                        objArrNode.add(userid);
-                        objArrNode.add(usage);
-                        objArrNode.add(charge);
-                        objArr.add(objArrNode);
-                    }*/
                 }
             }
 

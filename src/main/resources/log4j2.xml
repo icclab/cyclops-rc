@@ -6,23 +6,10 @@
         </File>
     </Appenders>
     <Loggers>
-        <Logger name="org.apache.log4j.xml" additivity="false" level="TRACE"/>
-        <Logger name="ch.icclab.cyclops.application.OpenstackRCServiceApplication" additivity="false" level="TRACE">
+        <Logger name="ch.icclab.cyclops" additivity="false" level="ALL">
             <AppenderRef ref="rc"/>
         </Logger>
-        <Logger name="ch.icclab.cyclops.resource.impl.GenerateResource" additivity="false" level="TRACE">
-            <AppenderRef ref="rc"/>
-        </Logger>
-        <Logger name="ch.icclab.cyclops.resource.impl.RateResource" additivity="false" level="TRACE">
-            <AppenderRef ref="rc"/>
-        </Logger>
-        <Logger name="ch.icclab.cyclops.resource.client.UDRServiceClient" additivity="false" level="TRACE">
-            <AppenderRef ref="rc"/>
-        </Logger>
-        <Logger name="ch.icclab.cyclops.usecases.tnova.client.AccountingClient" additivity="false" level="TRACE">
-            <AppenderRef ref="rc"/>
-        </Logger>
-        <Root level="TRACE">
+        <Root level="ALL">
             <AppenderRef ref="rc"/>
         </Root>
     </Loggers>
