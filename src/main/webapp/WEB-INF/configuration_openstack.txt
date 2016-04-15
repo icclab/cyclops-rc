@@ -20,3 +20,4 @@ InfluxDBPassword=root
 InfluxDBUsername=root
 dbName=rc_service
 eventsDbName=event
+cdrRecord=cdr

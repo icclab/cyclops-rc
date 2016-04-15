@@ -18,7 +18,7 @@
 package ch.icclab.cyclops.applicationFactory;
 
 import ch.icclab.cyclops.application.AbstractApplication;
-import ch.icclab.cyclops.application.McnRCServiceApplication;
+import ch.icclab.cyclops.application.EventRCServiceApplication;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,11 +26,11 @@ import org.apache.logging.log4j.Logger;
  * @author Manu
  * Created by root on 16.11.15.
  */
-public class McnRCServiceApplicationFactory extends AbstractApplicationFactory {
-    final static Logger logger = LogManager.getLogger(McnRCServiceApplicationFactory.class.getName());
+public class EventRCServiceApplicationFactory extends AbstractApplicationFactory {
+    final static Logger logger = LogManager.getLogger(EventRCServiceApplicationFactory.class.getName());
     @Override
     public AbstractApplication loadApplication() {
         logger.debug("Creating routes for a new MCN RCService.");
-        return new McnRCServiceApplication();
+        return new EventRCServiceApplication();
     }
 }

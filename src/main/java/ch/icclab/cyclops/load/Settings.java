@@ -56,7 +56,7 @@ public class Settings {
     private InfluxDBSettings loadInfluxDBSettings() {
         return new InfluxDBSettings(properties.getProperty("InfluxDBURL"),
                 properties.getProperty("InfluxDBUsername"), properties.getProperty("InfluxDBPassword"),
-                properties.getProperty("dbName"), properties.getProperty("eventsDbName"));
+                properties.getProperty("dbName"), properties.getProperty("eventsDbName"), properties.getProperty("cdrRecord"));
     }
 
     private CyclopsSettings loadCyclopsSettings() {

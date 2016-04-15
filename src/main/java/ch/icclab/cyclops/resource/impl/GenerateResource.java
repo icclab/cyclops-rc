@@ -647,7 +647,7 @@ public class GenerateResource extends ServerResource {
         strArr.add("userId");
         strArr.add("usage");
         strArr.add("price");
-        pricingData.setName("mcn_cdr");
+        pricingData.setName(Loader.getSettings().getInfluxDBSettings().getCdrRecord());
         pricingData.setColumns(strArr);
         pricingData.setPoints(objArr);
         //get tags and put them into pricingData

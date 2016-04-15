@@ -28,12 +28,19 @@ public class InfluxDBSettings {
     private String dbName;
     private String eventsDbName;
 
-    public InfluxDBSettings(String influxDBURL, String influxDBUser, String influxDBPassword, String dbName, String eventsDbName) {
+    private String cdrRecord;
+
+    public InfluxDBSettings(String influxDBURL, String influxDBUser, String influxDBPassword, String dbName, String eventsDbName, String cdrRercord) {
         this.url = influxDBURL;
         this.user = influxDBUser;
         this.password = influxDBPassword;
         this.dbName = dbName;
         this.eventsDbName = eventsDbName;
+        this.cdrRecord = cdrRercord;
+    }
+
+    public String getCdrRecord() {
+        return cdrRecord;
     }
 
     public String getEventsDbName() {

@@ -10,8 +10,9 @@ UDRServiceUrl=http://localhost:8080/udr
 ######################## ADVANCED SETTINGS ######################
 # Frequency has to be in seconds
 SchedulerFrequency=300
-Environment=Mcn
+Environment=Event
 
 # Where should we save CDR records?
 dbName=rc_service
 eventsDbName=event
+cdrRecord=cdr

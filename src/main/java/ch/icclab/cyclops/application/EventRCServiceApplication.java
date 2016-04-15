@@ -24,7 +24,6 @@ import ch.icclab.cyclops.resource.impl.RateResource;
 import ch.icclab.cyclops.resource.impl.RateStatusResource;
 import ch.icclab.cyclops.schedule.Endpoint;
 import ch.icclab.cyclops.schedule.Scheduler;
-import ch.icclab.cyclops.services.iaas.openstack.CDRGeneration;
 import ch.icclab.cyclops.usecases.mcn.McnRunner;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -35,8 +34,8 @@ import java.util.concurrent.TimeUnit;
  * @author Manu
  * Created by root on 16.11.15.
  */
-public class McnRCServiceApplication extends AbstractApplication {
-    final static Logger logger = LogManager.getLogger(McnRCServiceApplication.class.getName());
+public class EventRCServiceApplication extends AbstractApplication {
+    final static Logger logger = LogManager.getLogger(EventRCServiceApplication.class.getName());
 
     @Override
     public void createRoutes() {

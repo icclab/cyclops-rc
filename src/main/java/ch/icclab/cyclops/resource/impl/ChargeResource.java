@@ -17,6 +17,7 @@
 
 package ch.icclab.cyclops.resource.impl;
 
+import ch.icclab.cyclops.load.Loader;
 import ch.icclab.cyclops.model.ChargeResponse;
 import ch.icclab.cyclops.model.TSDBData;
 import ch.icclab.cyclops.database.InfluxDBClient;
@@ -71,7 +72,7 @@ public class ChargeResource extends ServerResource {
         String toDate = normalizeDateAndTime(getQueryValue("to"));
 
         //TODO: remove hard coded query
-        tsdbData = dbClient.getData("SELECT * FROM mcn_cdr WHERE userId='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
+        tsdbData = dbClient.getData("SELECT * FROM "+ Loader.getSettings().getInfluxDBSettings().getCdrRecord()+" WHERE userId='"+userid+"' AND time > '"+fromDate+"' AND time < '"+toDate+"'");
         cdrMap.put("columns", tsdbData.getColumns());
         cdrMap.put("points", tsdbData.getPoints());
         response = constructResponse(cdrMap,userid,fromDate,toDate);

@@ -18,7 +18,6 @@
 package ch.icclab.cyclops.applicationFactory;
 
 import ch.icclab.cyclops.application.AbstractApplication;
-import ch.icclab.cyclops.application.McnRCServiceApplication;
 import ch.icclab.cyclops.application.OpenstackRCServiceApplication;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
