@@ -20,6 +20,7 @@ package ch.icclab.cyclops.database;
 import ch.icclab.cyclops.load.Loader;
 import ch.icclab.cyclops.usecases.mcn.model.McnBillingModel;
 import ch.icclab.cyclops.model.TSDBData;
+import ch.icclab.cyclops.usecases.openstack.model.OpenstackCollectorBillingModel;
 import ch.icclab.cyclops.usecases.tnova.model.TnovaChargeList;
 import ch.icclab.cyclops.usecases.tnova.model.TnovaChargeResponse;
 import ch.icclab.cyclops.usecases.tnova.model.TnovaTSDBData;
@@ -577,6 +578,14 @@ public class InfluxDBClient extends ClientResource {
      */
     public McnBillingModel getBillingModel(String customer, String resource, String time) {
         McnBillingModel billingModel = new McnBillingModel();
+
+        billingModel.setPrice(getRate(resource, time));
+
+        return billingModel;
+    }
+
+    public OpenstackCollectorBillingModel getOpenstackBillingModel(String customer, String resource, String time) {
+        OpenstackCollectorBillingModel billingModel = new OpenstackCollectorBillingModel();
 
         billingModel.setPrice(getRate(resource, time));
 
